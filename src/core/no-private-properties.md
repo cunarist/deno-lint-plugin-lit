@@ -23,7 +23,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @state()
-  _open = false;
+  accessor _open = false;
 }
 ```
 

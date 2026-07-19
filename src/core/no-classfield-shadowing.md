@@ -25,7 +25,7 @@ class El extends Base {
 // GOOD
 class Base extends LitElement {
   @property()
-  name = "";
+  accessor name = "";
 }
 class El extends Base {
   declare name: string;

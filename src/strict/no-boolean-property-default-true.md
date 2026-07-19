@@ -24,7 +24,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property({ type: Boolean })
-  disabled = false;
+  accessor disabled = false;
 }
 ```
 

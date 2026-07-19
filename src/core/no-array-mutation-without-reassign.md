@@ -27,7 +27,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property({ type: Array })
-  items = [];
+  accessor items = [];
 
   add(item) {
     this.items = [...this.items, item];

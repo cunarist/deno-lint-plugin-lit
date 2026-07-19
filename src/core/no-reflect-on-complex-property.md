@@ -24,10 +24,10 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property({ type: Object })
-  data = {};
+  accessor data = {};
 
   @property({ type: Boolean, reflect: true })
-  empty = false;
+  accessor empty = false;
 }
 ```
 

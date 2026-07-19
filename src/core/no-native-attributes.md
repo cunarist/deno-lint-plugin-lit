@@ -22,9 +22,9 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property()
-  label = "";
+  accessor label = "";
   @property()
-  headingId = "";
+  accessor headingId = "";
 }
 ```
 

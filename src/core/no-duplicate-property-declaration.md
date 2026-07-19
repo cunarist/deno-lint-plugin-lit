@@ -25,7 +25,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property({ type: Number })
-  count = 0;
+  accessor count = 0;
 }
 ```
 

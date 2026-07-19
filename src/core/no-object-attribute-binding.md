@@ -18,7 +18,8 @@ Pass structured data as a property, where the value arrives intact.
 const t = html`<x-y config=${{ a: 1 }}></x-y>`;
 
 // GOOD
-const t = html`<x-y .config=${{ a: 1 }}></x-y>`;
+const config = { a: 1 };
+const t = html`<x-y .config=${config}></x-y>`;
 ```
 
 ```ts
@@ -26,7 +27,8 @@ const t = html`<x-y .config=${{ a: 1 }}></x-y>`;
 const t = html`<x-y items=${[1, 2]}></x-y>`;
 
 // GOOD
-const t = html`<x-y .items=${[1, 2]}></x-y>`;
+const items = [1, 2];
+const t = html`<x-y .items=${items}></x-y>`;
 ```
 
 ## Notes

@@ -20,6 +20,7 @@ import { preferContextDecorators } from "./prefer-context-decorators.ts";
 import { preferDecorators } from "./prefer-decorators.ts";
 import { requireCustomElementRegistration } from "./require-custom-element-registration.ts";
 import { requireEventInEventMap } from "./require-event-in-event-map.ts";
+import { requireTagNameMap } from "./require-tag-name-map.ts";
 import { staticStylesCssLiteral } from "./static-styles-css-literal.ts";
 import { tagMatchesClassName } from "./tag-matches-class-name.ts";
 
@@ -41,6 +42,7 @@ export const strictRules: Record<string, Deno.lint.Rule> = {
   "prefer-decorators": preferDecorators,
   "require-custom-element-registration": requireCustomElementRegistration,
   "require-event-in-event-map": requireEventInEventMap,
+  "require-tag-name-map": requireTagNameMap,
   "static-styles-css-literal": staticStylesCssLiteral,
   "tag-matches-class-name": tagMatchesClassName,
 };
@@ -70,6 +72,7 @@ export { preferContextDecorators } from "./prefer-context-decorators.ts";
 export { preferDecorators } from "./prefer-decorators.ts";
 export { requireCustomElementRegistration } from "./require-custom-element-registration.ts";
 export { requireEventInEventMap } from "./require-event-in-event-map.ts";
+export { requireTagNameMap } from "./require-tag-name-map.ts";
 export { staticStylesCssLiteral } from "./static-styles-css-literal.ts";
 export { tagMatchesClassName } from "./tag-matches-class-name.ts";
 

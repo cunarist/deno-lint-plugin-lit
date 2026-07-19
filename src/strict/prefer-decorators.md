@@ -21,9 +21,9 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property()
-  name = "";
+  accessor name = "";
   @state()
-  open = false;
+  accessor open = false;
 }
 ```
 

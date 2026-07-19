@@ -27,7 +27,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @state()
-  label = "";
+  accessor label = "";
 
   willUpdate() {
     this.label = this.name.toUpperCase();

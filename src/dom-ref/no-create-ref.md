@@ -38,6 +38,11 @@ class El extends LitElement {
   focusInput() {
     this.#input?.focus();
   }
+
+  render() {
+    const inputRef = ref(this.#onInput);
+    return html`<input ${inputRef}>`;
+  }
 }
 ```
 

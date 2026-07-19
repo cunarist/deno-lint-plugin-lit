@@ -23,11 +23,11 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @property({ attribute: "my-prop" })
-  myProp = "";
+  accessor myProp = "";
   @property({ attribute: false })
-  internalValue = "";
+  accessor internalValue = "";
   @property()
-  label = "";
+  accessor label = "";
 }
 ```
 

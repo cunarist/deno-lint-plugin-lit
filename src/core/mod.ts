@@ -57,7 +57,6 @@ import { requireContextType } from "./require-context-type.ts";
 import { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 import { requirePropertyType } from "./require-property-type.ts";
 import { requireRepeatKey } from "./require-repeat-key.ts";
-import { requireTagNameMap } from "./require-tag-name-map.ts";
 import { simpleTemplateExpressions } from "./simple-template-expressions.ts";
 import { svgTemplateForSvgContent } from "./svg-template-for-svg-content.ts";
 import { valueAfterConstraints } from "./value-after-constraints.ts";
@@ -116,7 +115,6 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "require-dispatch-on-this": requireDispatchOnThis,
   "require-property-type": requirePropertyType,
   "require-repeat-key": requireRepeatKey,
-  "require-tag-name-map": requireTagNameMap,
   "simple-template-expressions": simpleTemplateExpressions,
   "svg-template-for-svg-content": svgTemplateForSvgContent,
   "value-after-constraints": valueAfterConstraints,
@@ -183,7 +181,6 @@ export { requireContextType } from "./require-context-type.ts";
 export { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 export { requirePropertyType } from "./require-property-type.ts";
 export { requireRepeatKey } from "./require-repeat-key.ts";
-export { requireTagNameMap } from "./require-tag-name-map.ts";
 export { simpleTemplateExpressions } from "./simple-template-expressions.ts";
 export { svgTemplateForSvgContent } from "./svg-template-for-svg-content.ts";
 export { valueAfterConstraints } from "./value-after-constraints.ts";

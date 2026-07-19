@@ -25,7 +25,7 @@ class El extends LitElement {
 // GOOD
 class El extends LitElement {
   @state()
-  items = [];
+  accessor items = [];
 
   render() {
     return html`<p>${this.items}</p>`;

@@ -1,4 +1,4 @@
-import { requireTagNameMap } from "#core";
+import { requireTagNameMap } from "#strict";
 
 import {
   assertInvalid,

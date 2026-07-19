@@ -17,8 +17,8 @@ Four plugins. Each says something different about the code it rejects:
 
 | Plugin                 | Says                                              | Rules |
 | ---------------------- | ------------------------------------------------- | ----- |
-| `/core`                | This does not do what it looks like it does.      | 56    |
-| `/strict`              | Demanding, but we think you should.               | 18    |
+| `/core`                | This does not do what it looks like it does.      | 55    |
+| `/strict`              | Demanding, but we think you should.               | 19    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
 | `/reactive-controller` | Anything with a lifetime belongs in a controller. | 11    |
 
@@ -146,7 +146,6 @@ description rather than a program.
 | [`require-dispatch-on-this`](src/core/require-dispatch-on-this.md)                             | Missing: a component's events to be dispatched on the component itself                                                  |
 | [`require-property-type`](src/core/require-property-type.md)                                   | Missing: `{type: …}` on a `@property` whose value is not a string                                                       |
 | [`require-repeat-key`](src/core/require-repeat-key.md)                                         | `repeat(items, template)` — the two-argument form, with no key function                                                 |
-| [`require-tag-name-map`](src/core/require-tag-name-map.md)                                     | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file        |
 | [`simple-template-expressions`](src/core/simple-template-expressions.md)                       | Every `${…}` binding in an `html` template must be an identifier, `this`, or a non-computed member chain — nothing else |
 | [`svg-template-for-svg-content`](src/core/svg-template-for-svg-content.md)                     | SVG-only elements written directly in an `html` template with no enclosing `<svg>`                                      |
 | [`value-after-constraints`](src/core/value-after-constraints.md)                               | a `value` binding that appears before a validity constraint attribute on the same form control                          |
@@ -176,28 +175,47 @@ feature that this ruleset declines to use.
 | [`prefer-decorators`](src/strict/prefer-decorators.md)                                         | a `static properties` declaration on a Lit component                                                                                                                                                                                                                                           |
 | [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | Missing: every `LitElement` subclass in a file to be registered, either with `@customElement` or with `customElements.define`                                                                                                                                                                  |
 | [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file                                                                                                                                                                            |
+| [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file                                                                                                                                                                               |
 | [`static-styles-css-literal`](src/strict/static-styles-css-literal.md)                         | A `static styles` member must be a direct `css` tagged template — not an array, a reference, a call, or a getter                                                                                                                                                                               |
 | [`tag-matches-class-name`](src/strict/tag-matches-class-name.md)                               | a `@customElement` tag whose segments, after any leading prefix, do not PascalCase to the class name                                                                                                                                                                                           |
 
 ## `/dom-ref`
 
-One idea: the only way to reach an element is a `ref` callback you named. A
-selector string is resolved at call time, so a renamed id fails silently; a
-callback is a reference the compiler checks.
+One idea: the only way to reach an element is a `ref` callback you named.
+
+`@query` answers two questions badly: **which** element, and **when**.
+
+- **Which** — a selector matches by shape. `@query("input")` means "whichever
+  input comes first". Add one above it and you silently get a different element.
+- **When** — it is a lazy `querySelector`. It answers any time you ask,
+  including `null` before the first render.
+
+A `ref` callback settles both: it is bound to one position, and Lit calls it
+with the element as it attaches and `undefined` as it goes away.
 
 ```ts
 // BAD
 class Bad extends LitElement {
   @query("#input")
   accessor input;
+
+  override render() {
+    return html`<input id="input">`;
+  }
 }
 
 // GOOD
 class Good extends LitElement {
   #input: HTMLInputElement | undefined;
+
   #setInput = (el: Element | undefined) => {
     this.#input = el as HTMLInputElement | undefined;
   };
+
+  override render() {
+    const inputRef = ref(this.#setInput);
+    return html`<input ${inputRef}>`;
+  }
 }
 ```
 
