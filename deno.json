@@ -1,0 +1,55 @@
+{
+  "name": "@cunarist/deno-lint-plugin-lit",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    "./core": "./src/core/mod.ts",
+    "./strict": "./src/strict/mod.ts",
+    "./dom-ref": "./src/dom-ref/mod.ts",
+    "./reactive-controller": "./src/reactive-controller/mod.ts"
+  },
+  "imports": {
+    "#core": "./src/core/mod.ts",
+    "#strict": "./src/strict/mod.ts",
+    "#dom-ref": "./src/dom-ref/mod.ts",
+    "#reactive-controller": "./src/reactive-controller/mod.ts",
+    "#helpers": "./src/helpers/mod.ts",
+    "@std/assert": "jsr:@std/assert@^1.0.0"
+  },
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check && deno test",
+    "fix": "deno fmt && deno lint --fix"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true
+  },
+  "lint": {
+    "plugins": ["jsr:@cunarist/deno-import-check@0.7.0/lint"],
+    "rules": {
+      "tags": ["recommended", "jsr"],
+      "include": [
+        "camelcase",
+        "eqeqeq",
+        "guard-for-in",
+        "no-console",
+        "no-const-assign",
+        "no-eval",
+        "no-non-null-asserted-optional-chain",
+        "no-non-null-assertion",
+        "no-throw-literal",
+        "verbatim-module-syntax"
+      ]
+    }
+  },
+  "publish": {
+    "exclude": ["tests/", "AGENTS.md", "CLAUDE.md"]
+  },
+  "exclude": ["docs/"]
+}
