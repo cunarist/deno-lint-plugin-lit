@@ -22,9 +22,13 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  willUpdate() {
-    this.count = 1;
-  }
+  @state()
+  accessor count = 0;
+
+  #onClick = () => {
+    this.count += 1;
+  };
+
   render() {
     return html``;
   }

@@ -15,7 +15,11 @@ The call site is where the name earns its keep.
 class Items implements ReactiveController {}
 
 // GOOD
-class ItemsController implements ReactiveController {}
+class ItemsController implements ReactiveController {
+  constructor(host: ReactiveControllerHost) {
+    host.addController(this);
+  }
+}
 ```
 
 ## Notes

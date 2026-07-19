@@ -9,7 +9,7 @@ Rejects calling `this.requestUpdate()` inside `updated()` or `firstUpdated()`.
 infinite loop: the requested update commits, calls `updated()`, and requests
 another. Unlike a reactive property write there is no dirty check to stop it, so
 nothing converges — the component re-renders on every frame forever. If a second
-pass really is needed, work out why in `willUpdate()` and make the first pass
+pass really is needed, work out why before the update and make the first pass
 correct.
 
 ## Examples
@@ -25,8 +25,11 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  willUpdate() {
-    this.width = this.measurer.width;
+  @state()
+  accessor width = 0;
+
+  set measurer(value: Measurer) {
+    this.width = value.width;
   }
 }
 ```

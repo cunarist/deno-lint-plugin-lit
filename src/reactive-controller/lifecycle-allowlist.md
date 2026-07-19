@@ -36,8 +36,6 @@ class El extends LitElement {
 
   static styles = css``;
 
-  willUpdate(changed) {}
-
   render() {
     return html``;
   }
@@ -46,6 +44,10 @@ class El extends LitElement {
 
 ## Notes
 
+- This supersedes the advice in several `lit-core` rules. Where they say to
+  derive a value in `willUpdate()`, do it in the setter that receives the input;
+  where they say to dispatch from `updated()`, dispatch from the handler that
+  caused the change. Their own examples are written that way.
 - The full banned set: `connectedCallback`, `disconnectedCallback`,
   `firstUpdated`, `updated`, `shouldUpdate`, `update`, `performUpdate`,
   `requestUpdate`, `scheduleUpdate`.

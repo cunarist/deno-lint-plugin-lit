@@ -2,7 +2,7 @@
  * `no-property-change-update`
  *
  * Assigning to a reactive property inside `update()` schedules another update,
- * which assigns again — an infinite update loop. Do the work in `willUpdate()`
+ * which assigns again — an infinite update loop. Do the work in the setter
  * (before the update is committed) or guard it in `updated()`.
  */
 

@@ -30,14 +30,23 @@ class DataController implements ReactiveController {
 
 // GOOD
 class DataController implements ReactiveController {
+  #host: ReactiveControllerHost;
   #aborter = new AbortController();
+
+  constructor(host: ReactiveControllerHost) {
+    this.#host = host;
+    host.addController(this);
+  }
 
   async load() {
     const response = await fetch("/api/items", {
       signal: this.#aborter.signal,
     });
     this.items = await response.json();
+    this.#host.requestUpdate();
   }
+
+  hostConnected() {}
 
   hostDisconnected() {
     this.#aborter.abort();

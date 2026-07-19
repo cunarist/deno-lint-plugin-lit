@@ -3,7 +3,7 @@
  *
  * Assigning to a reactive property from `updated()` or `firstUpdated()` marks
  * the component dirty again, so Lit schedules another update — which calls
- * `updated()` again. Compute the value in `willUpdate()` instead.
+ * `updated()` again. Derive the value in the setter that receives the input.
  */
 
 import {
@@ -92,8 +92,8 @@ export const noPropertyChangeInUpdated: Deno.lint.Rule = {
         node,
         message: `Reactive property "${name}" is changed inside ${hook}().`,
         hint:
-          "This re-enters the update cycle. Compute the value in willUpdate() " +
-          "instead, before the update is committed.",
+          "This re-enters the update cycle. Derive the value in the setter " +
+          "that receives the input, before the update is committed.",
       });
     }
 

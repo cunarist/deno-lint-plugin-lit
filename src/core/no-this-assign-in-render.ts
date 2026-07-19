@@ -42,7 +42,7 @@ export const noThisAssignInRender: Deno.lint.Rule = {
         node,
         message: `${path ?? "this"} is assigned inside render().`,
         hint:
-          "render() must be pure. Compute the value in willUpdate() and read it here.",
+          "render() must be pure. Derive the value where the input arrives, and read it here.",
       });
     }
 

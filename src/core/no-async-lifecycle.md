@@ -24,8 +24,11 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  willUpdate() {
-    this.items = this.loader.items;
+  @state()
+  accessor items = [];
+
+  set loader(value: Loader) {
+    this.items = value.items;
   }
 }
 ```

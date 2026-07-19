@@ -26,8 +26,12 @@ class El extends LitElement {
 class El extends LitElement {
   @property({ type: String })
   accessor name = "";
-  willUpdate() {
-    this.name = "x";
+
+  @state()
+  accessor upper = "";
+
+  set source(value: string) {
+    this.upper = value.toUpperCase();
   }
 }
 ```

@@ -23,7 +23,7 @@ class El extends LitElement {
 class El extends LitElement {
   @property({ type: String })
   accessor label = "";
-  @property({ type: String })
+  @property({ type: String, attribute: "heading-id" })
   accessor headingId = "";
 }
 ```

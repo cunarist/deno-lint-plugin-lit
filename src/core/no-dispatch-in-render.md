@@ -9,7 +9,7 @@ more than once per update and does not guarantee when, so an event dispatched
 there fires an unpredictable number of times. Worse, a listener that reacts by
 writing back to a reactive property schedules another render, which dispatches
 again — a loop with no obvious cause in the stack trace. Dispatch from the event
-handler that caused the change, or from `updated()` once the DOM is committed.
+handler that caused the change, or from the setter that received the new value.
 
 ## Examples
 
@@ -24,9 +24,9 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  updated() {
-    this.dispatchEvent(new CustomEvent("rendered"));
-  }
+  #onClick = () => {
+    this.dispatchEvent(new CustomEvent("chosen"));
+  };
 }
 ```
 

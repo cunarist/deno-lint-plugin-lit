@@ -22,6 +22,10 @@ class BarController implements ReactiveController {
 
 // GOOD
 class BarController implements ReactiveController {
+  constructor(host: ReactiveControllerHost) {
+    host.addController(this);
+  }
+
   hostConnected(): void {}
   hostDisconnected(): void {}
 }

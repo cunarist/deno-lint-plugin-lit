@@ -89,6 +89,18 @@ diagnostic twice.
 
 ### Per-rule docs
 
+`tests/docs_consistency_test.ts` lints every `// GOOD` snippet in every doc with
+**all five plugins at once**. That is what catches a rule whose advice another
+rule forbids — it found five docs telling people to derive values in
+`willUpdate()`, which `lifecycle-allowlist` bans, including that rule's own
+example. Two escape hatches exist and both are commented in the test: snippet
+noise (a minimal example omitting `@customElement` and friends) and one expected
+disagreement (`lifecycle-super` must override a callback to describe itself).
+
+Write what a rule rejects and how to fix it. **Do not write implementation
+history** — "an earlier version inferred…", "this was inverted because…". That
+belongs in a commit message. A reader of a rule doc wants the current behaviour.
+
 Every rule has a `.md` next to its `.ts`, same basename, linked from the README
 table. Examples are derived from the rule's test file so docs cannot drift from
 behaviour. Relative links work on GitHub; they will not resolve on jsr.io until

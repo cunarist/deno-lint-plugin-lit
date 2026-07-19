@@ -23,7 +23,7 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  @property({ type: Boolean })
+  @property({ type: Boolean, attribute: "has-updated" })
   accessor hasUpdated = false;
 }
 ```
