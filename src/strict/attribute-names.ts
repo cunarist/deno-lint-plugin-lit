@@ -64,9 +64,7 @@ export const attributeNames: Deno.lint.Rule = {
         node,
         message:
           `Reactive property "${name}" has no explicit attribute name, so its attribute is "${name.toLowerCase()}".`,
-        hint: `Add attribute: "${
-          pascalToKebab(name)
-        }" — or attribute: false if it should not be set from markup.`,
+        hint: `Name it explicitly: attribute: "${pascalToKebab(name)}".`,
       });
     }
 

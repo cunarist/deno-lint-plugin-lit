@@ -14,25 +14,24 @@ that there is none, makes the mapping explicit.
 ## Examples
 
 ```ts
-// BAD
+// BAD - the attribute silently becomes "myprop"
 class El extends LitElement {
   @property()
-  myProp = "";
+  accessor myProp = "";
 }
 
 // GOOD
 class El extends LitElement {
   @property({ attribute: "my-prop" })
   accessor myProp = "";
-  @property({ attribute: false })
-  accessor internalValue = "";
-  @property()
-  accessor label = "";
 }
 ```
 
 ## Notes
 
+- **`attribute: false` is not the same fix.** It silences the rule by removing
+  the attribute, so `<my-el my-prop="x">` stops working. Reach for it only when
+  the property is never set from markup; otherwise name the attribute.
 - All-lowercase names are fine as-is; only names containing uppercase are
   checked.
 - `@state` and undecorated fields are ignored — they have no attribute.
