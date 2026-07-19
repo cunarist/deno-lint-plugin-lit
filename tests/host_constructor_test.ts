@@ -98,3 +98,39 @@ Deno.test("host-constructor: highlights the bad parameter", () => {
   if (!diagnostic) throw new Error("expected a diagnostic");
   assertReportedText(code, diagnostic, "owner: ReactiveControllerHost");
 });
+
+Deno.test("host-constructor: requires the host to be stored as #host", () => {
+  // Sibling rules read `this.#host`. Enforcing the name here is what lets them
+  // rely on it instead of quietly skipping controllers that use another.
+  assertInvalid(
+    plugin,
+    `class C implements ReactiveController {
+      #element;
+      constructor(host: ReactiveControllerHost) {
+        this.#element = host;
+        host.addController(this);
+      }
+    }`,
+  );
+});
+
+Deno.test("host-constructor: accepts #host, and storing nothing", () => {
+  assertValid(
+    plugin,
+    `class C implements ReactiveController {
+      #host;
+      constructor(host: ReactiveControllerHost) {
+        this.#host = host;
+        host.addController(this);
+      }
+    }`,
+  );
+  assertValid(
+    plugin,
+    `class C implements ReactiveController {
+      constructor(host: ReactiveControllerHost) {
+        host.addController(this);
+      }
+    }`,
+  );
+});

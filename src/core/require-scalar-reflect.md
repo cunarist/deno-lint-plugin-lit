@@ -1,6 +1,6 @@
-# no-reflect-on-complex-property
+# require-scalar-reflect
 
-Rejects `reflect: true` combined with `{type: Object}` or `{type: Array}`.
+Rejects `reflect: true` unless the options prove the value is a scalar.
 
 ## Why
 
@@ -33,6 +33,12 @@ class El extends LitElement {
 
 ## Notes
 
+- Reflection is accepted only when the options say the value is a scalar:
+  `type: String`, `Number` or `Boolean`, or a `converter` of your own.
+- `reflect: true` with no `type` is reported. That is the default converter,
+  which writes `[object Object]` into the DOM for anything but a string.
+- A `type` the rule cannot read — `type: TYPES.obj`, a variable — is reported
+  too, since nothing in the options establishes the value is scalar.
 - Both declaration styles are checked: a `@property({...})` options object and
   an entry of `static properties`.
 - Only a literal `reflect: true` fires the rule. `reflect: someFlag` is not

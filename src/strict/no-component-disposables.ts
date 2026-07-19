@@ -20,13 +20,17 @@ const DISPOSABLE_CONSTRUCTORS: readonly string[] = [
   "Worker",
 ];
 
-/** Methods that acquire or release a resource. */
+/**
+ * DOM methods that register or release a listener.
+ *
+ * Only real DOM API names belong here. `destroy`, `dispose` and `disconnect`
+ * were removed: they are names people give their own methods, so the rule was
+ * reporting `chart.destroy()`, `db.dispose()` and `animation.disconnect()` —
+ * none of which are component-owned resources.
+ */
 const DISPOSABLE_METHODS: readonly string[] = [
   "addEventListener",
   "removeEventListener",
-  "destroy",
-  "disconnect",
-  "dispose",
 ];
 
 const HINT =
@@ -48,8 +52,7 @@ function lastSegment(path: string | null): string | null {
  * Rejects constructing `AbortController`, `EventSource`,
  * `IntersectionObserver`, `MutationObserver`, `ResizeObserver`, `WebSocket`,
  * or `Worker` inside a Lit component, and rejects calling
- * `addEventListener`, `removeEventListener`, `destroy`, `disconnect`,
- * or `dispose` there.
+ * `addEventListener` or `removeEventListener` there.
  */
 export const noComponentDisposables: Deno.lint.Rule = {
   create(ctx) {

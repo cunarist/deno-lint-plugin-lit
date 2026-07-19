@@ -50,6 +50,10 @@ class BarController implements ReactiveController {
 
 ## Notes
 
+`host-constructor` requires the host to be stored as `this.#host`, so that is
+the field this rule looks at. Without that rule on, a controller keeping the
+host under another name is not checked.
+
 Only `this.#host` and `this.host` count as the stored host, and only a
 non-static property definition declares one. A read anywhere in the class body
 satisfies the rule, including inside an arrow-function field. Appearing as the

@@ -6,13 +6,13 @@
  * Everything else the controller needs is handed to it later, by the host.
  */
 
-import { isLitComponent, looksLikeReactiveController } from "#helpers";
+import { isLitComponent, isReactiveController, memberPath } from "#helpers";
 
 /** A class in scope for the controller rules. */
 function isControllerClass(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
-  return !isLitComponent(node) && looksLikeReactiveController(node);
+  return !isLitComponent(node) && isReactiveController(node);
 }
 
 /** The constructor of a class, if it defines one. */
@@ -40,6 +40,33 @@ function typeReferenceName(
   };
   if (name.type === "Identifier") return name.name ?? null;
   if (name.type === "TSQualifiedName") return name.right?.name ?? null;
+  return null;
+}
+
+/**
+ * Where the constructor stores its host parameter, if it stores it at all.
+ *
+ * The parameter is followed to its assignment rather than assumed to land in a
+ * field of a particular name — that is the point of the check. The sibling
+ * rules then read `this.#host` knowing this rule enforced it.
+ */
+function storageTarget(
+  constructor: Deno.lint.MethodDefinition,
+  paramName: string,
+): { node: Deno.lint.Node; path: string } | null {
+  const body = constructor.value.body;
+  if (!body) return null;
+  for (const statement of body.body) {
+    if (statement.type !== "ExpressionStatement") continue;
+    const expression = statement.expression;
+    if (expression.type !== "AssignmentExpression") continue;
+    if (expression.operator !== "=") continue;
+    if (expression.right.type !== "Identifier") continue;
+    if (expression.right.name !== paramName) continue;
+    const path = memberPath(expression.left);
+    if (path === null) continue;
+    return { node: expression.left, path };
+  }
   return null;
 }
 
@@ -118,6 +145,17 @@ export const hostConstructor: Deno.lint.Rule = {
           message:
             "Reactive controller host parameter is not typed `ReactiveControllerHost`.",
           hint: HINT,
+        });
+        return;
+      }
+
+      const stored = storageTarget(constructor, param.name);
+      if (stored !== null && stored.path !== "this.#host") {
+        ctx.report({
+          node: stored.node,
+          message: `Host is stored as \`${stored.path}\`, not \`this.#host\`.`,
+          hint:
+            "Sibling rules read the host through `this.#host`. Under any other name they cannot see it, and stop checking this controller.",
         });
       }
     }

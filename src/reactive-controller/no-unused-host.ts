@@ -9,8 +9,8 @@
 import {
   enclosingClass,
   isLitComponent,
+  isReactiveController,
   keyName,
-  looksLikeReactiveController,
   memberPath,
 } from "#helpers";
 
@@ -25,7 +25,7 @@ interface HostStore {
 function isControllerClass(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
-  return !isLitComponent(node) && looksLikeReactiveController(node);
+  return !isLitComponent(node) && isReactiveController(node);
 }
 
 /** Whether a member expression reads `this.host` or `this.#host`. */

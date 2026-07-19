@@ -6,13 +6,15 @@
     "./core": "./src/core/mod.ts",
     "./strict": "./src/strict/mod.ts",
     "./dom-ref": "./src/dom-ref/mod.ts",
-    "./reactive-controller": "./src/reactive-controller/mod.ts"
+    "./reactive-controller": "./src/reactive-controller/mod.ts",
+    "./naming": "./src/naming/mod.ts"
   },
   "imports": {
     "#core": "./src/core/mod.ts",
     "#strict": "./src/strict/mod.ts",
     "#dom-ref": "./src/dom-ref/mod.ts",
     "#reactive-controller": "./src/reactive-controller/mod.ts",
+    "#naming": "./src/naming/mod.ts",
     "#helpers": "./src/helpers/mod.ts",
     "@std/assert": "jsr:@std/assert@^1.0.0"
   },

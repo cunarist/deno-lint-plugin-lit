@@ -1,4 +1,4 @@
-import { noReflectOnComplexProperty } from "#core";
+import { requireScalarReflect } from "#core";
 
 import {
   assertInvalid,
@@ -8,11 +8,11 @@ import {
 } from "./harness.ts";
 
 const plugin = rulePlugin(
-  "no-reflect-on-complex-property",
-  noReflectOnComplexProperty,
+  "require-scalar-reflect",
+  requireScalarReflect,
 );
 
-Deno.test("no-reflect-on-complex-property: allows reflecting scalars", () => {
+Deno.test("require-scalar-reflect: allows reflecting scalars", () => {
   assertValid(
     plugin,
     `class El extends LitElement {
@@ -23,7 +23,7 @@ Deno.test("no-reflect-on-complex-property: allows reflecting scalars", () => {
   );
 });
 
-Deno.test("no-reflect-on-complex-property: allows complex properties without reflect", () => {
+Deno.test("require-scalar-reflect: allows complex properties without reflect", () => {
   assertValid(
     plugin,
     `class El extends LitElement {
@@ -33,7 +33,7 @@ Deno.test("no-reflect-on-complex-property: allows complex properties without ref
   );
 });
 
-Deno.test("no-reflect-on-complex-property: ignores non-Lit classes", () => {
+Deno.test("require-scalar-reflect: ignores non-Lit classes", () => {
   assertValid(
     plugin,
     `class Plain {
@@ -42,7 +42,7 @@ Deno.test("no-reflect-on-complex-property: ignores non-Lit classes", () => {
   );
 });
 
-Deno.test("no-reflect-on-complex-property: rejects reflecting an object", () => {
+Deno.test("require-scalar-reflect: rejects reflecting an object", () => {
   assertInvalid(
     plugin,
     `class El extends LitElement {
@@ -51,7 +51,7 @@ Deno.test("no-reflect-on-complex-property: rejects reflecting an object", () => 
   );
 });
 
-Deno.test("no-reflect-on-complex-property: rejects reflecting an array", () => {
+Deno.test("require-scalar-reflect: rejects reflecting an array", () => {
   assertInvalid(
     plugin,
     `class El extends LitElement {
@@ -60,7 +60,7 @@ Deno.test("no-reflect-on-complex-property: rejects reflecting an array", () => {
   );
 });
 
-Deno.test("no-reflect-on-complex-property: rejects it in static properties", () => {
+Deno.test("require-scalar-reflect: rejects it in static properties", () => {
   assertInvalid(
     plugin,
     `class El extends LitElement {
@@ -72,11 +72,34 @@ Deno.test("no-reflect-on-complex-property: rejects it in static properties", () 
   );
 });
 
-Deno.test("no-reflect-on-complex-property: highlights the reflect option", () => {
+Deno.test("require-scalar-reflect: highlights the reflect option", () => {
   const code = `class El extends LitElement {
   @property({type: Object, reflect: true}) data = {};
 }`;
   const [diagnostic] = assertInvalid(plugin, code);
   if (!diagnostic) throw new Error("expected a diagnostic");
   assertReportedText(code, diagnostic, "reflect: true");
+});
+
+Deno.test("require-scalar-reflect: reports reflect with no type at all", () => {
+  // The worst case: the identity converter writes `[object Object]` into the
+  // DOM. An earlier version only looked for `type: Object` and missed this.
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property({ reflect: true }) accessor data = {}; }",
+  );
+});
+
+Deno.test("require-scalar-reflect: reports an unreadable type", () => {
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property({ reflect: true, type: TYPES.obj }) accessor d = {}; }",
+  );
+});
+
+Deno.test("require-scalar-reflect: accepts a custom converter", () => {
+  assertValid(
+    plugin,
+    "class El extends LitElement { @property({ reflect: true, converter: c }) accessor at; }",
+  );
 });

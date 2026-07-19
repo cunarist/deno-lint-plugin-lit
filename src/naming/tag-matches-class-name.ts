@@ -36,8 +36,8 @@ function customElementTagNode(
   return null;
 }
 
-/** Whether some suffix of the tag's segments PascalCases to the class name. */
-function tagNamesClass(tag: string, className: string): boolean {
+/** Whether some suffix of the tag's segments PascalCases to `className`. */
+function suffixNames(tag: string, className: string): boolean {
   const segments = tag.split("-").filter((segment) => segment.length > 0);
   for (let start = 0; start < segments.length; start += 1) {
     if (kebabToPascal(segments.slice(start).join("-")) === className) {
@@ -45,6 +45,19 @@ function tagNamesClass(tag: string, className: string): boolean {
     }
   }
   return false;
+}
+
+/**
+ * Whether the tag names the class, with or without a trailing `Element`.
+ *
+ * `PathBarElement` and `PathBar` both belong to `cl-path-bar`. The suffix is a
+ * common way to distinguish a component class from an ordinary one, and the tag
+ * never carries it.
+ */
+function tagNamesClass(tag: string, className: string): boolean {
+  if (suffixNames(tag, className)) return true;
+  const withoutElement = className.replace(/Element$/, "");
+  return withoutElement !== className && suffixNames(tag, withoutElement);
 }
 
 function check(

@@ -38,6 +38,9 @@ class SizeController {
 
 ## Notes
 
+- `this.host` and `this.#host` are the accepted receivers because
+  `lit-reactive-controller/host-constructor` requires the host to be stored
+  under that name.
 - Deliberately **not** gated to Lit components. The permitted form lives in a
   controller, which is not a component, so gating on the component class would
   make the escape hatch unreachable. The consequence is that this fires on any

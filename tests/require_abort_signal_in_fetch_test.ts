@@ -94,7 +94,7 @@ Deno.test("require-abort-signal-in-fetch: rejects options without a signal", () 
   const diagnostics = assertInvalid(
     plugin,
     [
-      "class SearchController {",
+      "class SearchController implements ReactiveController {",
       "  hostDisconnected() {}",
       "  async load() {",
       '    await fetch("/api", { method: "POST" });',

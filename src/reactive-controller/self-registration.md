@@ -30,6 +30,9 @@ class BarController implements ReactiveController {
 
 ## Notes
 
+`host-constructor` requires the host parameter to be named `host` and stored as
+`this.#host`, which is what makes these receivers exhaustive.
+
 Accepted receivers are `host`, `this.host`, and `this.#host`, so registering
 through a stored host works:
 

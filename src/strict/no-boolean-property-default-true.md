@@ -1,6 +1,6 @@
 # no-boolean-property-default-true
 
-Rejects a boolean reactive property initialised to `true`.
+Rejects a boolean reactive property whose default is not literal `false`.
 
 ## Why
 
@@ -30,9 +30,13 @@ class El extends LitElement {
 
 ## Notes
 
-- Fires on an explicit `{type: Boolean}` and also on a field whose annotation or
-  initialiser is a boolean, since the converter Lit picks makes no difference to
-  the markup problem.
+- Two defaults are accepted: literal `false`, and no initialiser at all.
+  Anything else is reported, including `= DEFAULTS.open` and `= !!1` — a
+  computed default can be `true` and nothing in the file says otherwise.
+- Only `{type: Boolean}` fires the rule. A field merely annotated `: boolean` is
+  left alone: without that option Lit installs the String converter, so the
+  property has no boolean attribute and the asymmetry never arises. Declaring
+  the type is `require-property-type`'s job.
 - `attribute: false` is accepted. Such a property is never set from markup, so
   the asymmetry does not arise.
 - `@state` is never checked, for the same reason.

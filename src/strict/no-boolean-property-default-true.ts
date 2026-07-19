@@ -64,28 +64,16 @@ function declaresBoolean(options: Deno.lint.Expression | null): boolean {
 }
 
 /**
- * The `: T` annotation of a class field. `AccessorProperty` carries one at
- * runtime but omits it from Deno's typings, so it is read through a narrow
- * cast. Verified against Deno 2.9.3; drop the cast if the typings catch up.
+ * The initialiser to report, when it is not provably absent-or-false.
+ *
+ * Only two shapes are provably safe: no initialiser at all, and literal
+ * `false`. A computed default such as `DEFAULTS.open` may be `true`, and
+ * nothing in the file settles it.
  */
-function fieldAnnotation(
-  member: FieldNode,
-): Deno.lint.TSTypeAnnotation | undefined {
-  const bag = member as unknown as {
-    typeAnnotation?: Deno.lint.TSTypeAnnotation;
-  };
-  return bag.typeAnnotation;
-}
-
-/** Whether a field is annotated `: boolean`. */
-function annotatedBoolean(member: FieldNode): boolean {
-  return fieldAnnotation(member)?.typeAnnotation.type === "TSBooleanKeyword";
-}
-
-/** The `true` initialiser of a field, if that is exactly what it has. */
-function trueInitializer(member: FieldNode): Deno.lint.Expression | null {
+function unsafeInitializer(member: FieldNode): Deno.lint.Expression | null {
   const value = member.value;
-  if (!value || value.type !== "Literal" || value.value !== true) return null;
+  if (!value) return null;
+  if (value.type === "Literal" && value.value === false) return null;
   return value;
 }
 
@@ -107,16 +95,17 @@ function fieldsByName(node: ClassNode): Map<string, FieldNode> {
 }
 
 /**
- * Rejects a boolean reactive property initialised to `true`.
+ * Rejects a `{type: Boolean}` property whose default is not literal `false`.
  */
 export const noBooleanPropertyDefaultTrue: Deno.lint.Rule = {
   create(ctx) {
     function report(node: Deno.lint.Node, name: string): void {
       ctx.report({
         node,
-        message: `Boolean property "${name}" defaults to true.`,
+        message:
+          `Boolean property "${name}" has a default that is not literal false.`,
         hint:
-          "A boolean attribute is true when present and false when absent, so markup cannot unset it. Invert the property and default it to false.",
+          "A boolean attribute is true when present and false when absent, so markup cannot unset a truthy default. Default it to false, or invert the property.",
       });
     }
 
@@ -136,8 +125,8 @@ export const noBooleanPropertyDefaultTrue: Deno.lint.Rule = {
         if (decorator) {
           const options = decoratorOptions(decorator);
           if (attributeDisabled(options)) continue;
-          if (!declaresBoolean(options) && !annotatedBoolean(member)) continue;
-          const initializer = trueInitializer(member);
+          if (!declaresBoolean(options)) continue;
+          const initializer = unsafeInitializer(member);
           const name = keyName(member.key);
           if (initializer && name !== null) report(initializer, name);
           continue;
@@ -155,7 +144,7 @@ export const noBooleanPropertyDefaultTrue: Deno.lint.Rule = {
           if (!declaresBoolean(options)) continue;
           const field = fields.get(name);
           if (!field) continue;
-          const initializer = trueInitializer(field);
+          const initializer = unsafeInitializer(field);
           if (initializer) report(initializer, name);
         }
       }

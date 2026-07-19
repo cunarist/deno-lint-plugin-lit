@@ -10,7 +10,7 @@ import {
   enclosingClass,
   enclosingMethod,
   isLitComponent,
-  looksLikeReactiveController,
+  isReactiveController,
   memberPath,
 } from "#helpers";
 
@@ -21,7 +21,7 @@ const HOST_PATHS: readonly string[] = ["host", "this.host", "this.#host"];
 function isControllerClass(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
-  return !isLitComponent(node) && looksLikeReactiveController(node);
+  return !isLitComponent(node) && isReactiveController(node);
 }
 
 /** The constructor of a class, if it defines one. */

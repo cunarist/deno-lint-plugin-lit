@@ -29,9 +29,13 @@ class BarController implements ReactiveController {
 
 ## Notes
 
-Each of these is reported separately: no constructor at all, a parameter count
-other than one, a parameter not named `host`, an optional `host?`, and a `host`
-whose type annotation is missing or is not `ReactiveControllerHost`.
+- The host must also be stored as `this.#host` if it is stored at all. Sibling
+  rules read the host through that field; under any other name they cannot find
+  it and silently stop checking the controller. Storing nothing is fine — a
+  controller that only calls `host.addController(this)` needs no field. Each of
+  these is reported separately: no constructor at all, a parameter count other
+  than one, a parameter not named `host`, an optional `host?`, and a `host`
+  whose type annotation is missing or is not `ReactiveControllerHost`.
 
 Everything else the controller needs is handed over afterwards by the host — see
 `controller-construction-args`, which enforces the other side of the same rule.

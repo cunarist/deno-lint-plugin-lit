@@ -36,5 +36,5 @@ class El extends LitElement {
 - The diagnostic points at the `static properties` key, which is usually the
   redundant one — but either declaration can be the one to remove.
 - Disjoint names across the two styles are fine. Mixing styles in one class is
-  not itself an error here; only the overlap is. `prefer-decorators` in the
-  `disciplined` config takes the stronger position.
+  not itself an error here; only the overlap is. `lit-strict/prefer-decorators`
+  takes the stronger position.

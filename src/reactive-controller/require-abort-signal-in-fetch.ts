@@ -9,7 +9,7 @@
 import {
   enclosingClass,
   isLitComponent,
-  looksLikeReactiveController,
+  isReactiveController,
   memberPath,
 } from "#helpers";
 
@@ -54,7 +54,7 @@ export const requireAbortSignalInFetch: Deno.lint.Rule = {
         const owner = enclosingClass(node);
         if (owner === null) return;
         if (isLitComponent(owner)) return;
-        if (!looksLikeReactiveController(owner)) return;
+        if (!isReactiveController(owner)) return;
         // `fetch(...args)` hides its options; there is nothing to check.
         if (node.arguments.some((a) => a.type === "SpreadElement")) return;
         if (carriesSignal(node.arguments[1])) return;

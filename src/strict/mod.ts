@@ -22,7 +22,6 @@ import { requireCustomElementRegistration } from "./require-custom-element-regis
 import { requireEventInEventMap } from "./require-event-in-event-map.ts";
 import { requireTagNameMap } from "./require-tag-name-map.ts";
 import { staticStylesCssLiteral } from "./static-styles-css-literal.ts";
-import { tagMatchesClassName } from "./tag-matches-class-name.ts";
 
 /** The `lit-strict` rules, for composing your own plugin. */
 export const strictRules: Record<string, Deno.lint.Rule> = {
@@ -44,7 +43,6 @@ export const strictRules: Record<string, Deno.lint.Rule> = {
   "require-event-in-event-map": requireEventInEventMap,
   "require-tag-name-map": requireTagNameMap,
   "static-styles-css-literal": staticStylesCssLiteral,
-  "tag-matches-class-name": tagMatchesClassName,
 };
 
 /**
@@ -74,6 +72,5 @@ export { requireCustomElementRegistration } from "./require-custom-element-regis
 export { requireEventInEventMap } from "./require-event-in-event-map.ts";
 export { requireTagNameMap } from "./require-tag-name-map.ts";
 export { staticStylesCssLiteral } from "./static-styles-css-literal.ts";
-export { tagMatchesClassName } from "./tag-matches-class-name.ts";
 
 export default plugin;

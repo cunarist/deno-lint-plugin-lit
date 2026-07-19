@@ -51,9 +51,6 @@ Deno.test("no-component-disposables: rejects each disposable method", () => {
     const name of [
       "addEventListener",
       "removeEventListener",
-      "destroy",
-      "disconnect",
-      "dispose",
     ]
   ) {
     assertInvalid(

@@ -33,17 +33,14 @@ import { noLegacyImports } from "./no-legacy-imports.ts";
 import { noLegacyTemplateSyntax } from "./no-legacy-template-syntax.ts";
 import { noMultipleDefaultSlots } from "./no-multiple-default-slots.ts";
 import { noNativeAttributes } from "./no-native-attributes.ts";
-import { noObjectAttributeBinding } from "./no-object-attribute-binding.ts";
 import { noPartialPropertyBinding } from "./no-partial-property-binding.ts";
 import { noPrivateProperties } from "./no-private-properties.ts";
 import { noPropertyChangeInUpdated } from "./no-property-change-in-updated.ts";
 import { noPropertyChangeUpdate } from "./no-property-change-update.ts";
 import { noPropertyNamedLikeLifecycle } from "./no-property-named-like-lifecycle.ts";
-import { noReflectOnComplexProperty } from "./no-reflect-on-complex-property.ts";
 import { noRequestUpdateInUpdated } from "./no-request-update-in-updated.ts";
 import { noScriptInTemplate } from "./no-script-in-template.ts";
 import { noSelfClosingNonVoid } from "./no-self-closing-non-void.ts";
-import { noTemplateResultInAttribute } from "./no-template-result-in-attribute.ts";
 import { noThisAssignInRender } from "./no-this-assign-in-render.ts";
 import { noThisInStaticStyles } from "./no-this-in-static-styles.ts";
 import { noUnsafeCss } from "./no-unsafe-css.ts";
@@ -53,9 +50,11 @@ import { noValueAttribute } from "./no-value-attribute.ts";
 import { preferStaticStyles } from "./prefer-static-styles.ts";
 import { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 import { requireContextType } from "./require-context-type.ts";
+import { requireDashedTag } from "./require-dashed-tag.ts";
 import { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 import { requirePropertyType } from "./require-property-type.ts";
 import { requireRepeatKey } from "./require-repeat-key.ts";
+import { requireScalarReflect } from "./require-scalar-reflect.ts";
 import { simpleTemplateExpressions } from "./simple-template-expressions.ts";
 import { svgTemplateForSvgContent } from "./svg-template-for-svg-content.ts";
 import { valueAfterConstraints } from "./value-after-constraints.ts";
@@ -90,17 +89,14 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "no-legacy-template-syntax": noLegacyTemplateSyntax,
   "no-multiple-default-slots": noMultipleDefaultSlots,
   "no-native-attributes": noNativeAttributes,
-  "no-object-attribute-binding": noObjectAttributeBinding,
   "no-partial-property-binding": noPartialPropertyBinding,
   "no-private-properties": noPrivateProperties,
   "no-property-change-in-updated": noPropertyChangeInUpdated,
   "no-property-change-update": noPropertyChangeUpdate,
   "no-property-named-like-lifecycle": noPropertyNamedLikeLifecycle,
-  "no-reflect-on-complex-property": noReflectOnComplexProperty,
   "no-request-update-in-updated": noRequestUpdateInUpdated,
   "no-script-in-template": noScriptInTemplate,
   "no-self-closing-non-void": noSelfClosingNonVoid,
-  "no-template-result-in-attribute": noTemplateResultInAttribute,
   "no-this-assign-in-render": noThisAssignInRender,
   "no-this-in-static-styles": noThisInStaticStyles,
   "no-unsafe-css": noUnsafeCss,
@@ -110,9 +106,11 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "prefer-static-styles": preferStaticStyles,
   "require-accessor-with-decorators": requireAccessorWithDecorators,
   "require-context-type": requireContextType,
+  "require-dashed-tag": requireDashedTag,
   "require-dispatch-on-this": requireDispatchOnThis,
   "require-property-type": requirePropertyType,
   "require-repeat-key": requireRepeatKey,
+  "require-scalar-reflect": requireScalarReflect,
   "simple-template-expressions": simpleTemplateExpressions,
   "svg-template-for-svg-content": svgTemplateForSvgContent,
   "value-after-constraints": valueAfterConstraints,
@@ -155,17 +153,14 @@ export { noLegacyImports } from "./no-legacy-imports.ts";
 export { noLegacyTemplateSyntax } from "./no-legacy-template-syntax.ts";
 export { noMultipleDefaultSlots } from "./no-multiple-default-slots.ts";
 export { noNativeAttributes } from "./no-native-attributes.ts";
-export { noObjectAttributeBinding } from "./no-object-attribute-binding.ts";
 export { noPartialPropertyBinding } from "./no-partial-property-binding.ts";
 export { noPrivateProperties } from "./no-private-properties.ts";
 export { noPropertyChangeInUpdated } from "./no-property-change-in-updated.ts";
 export { noPropertyChangeUpdate } from "./no-property-change-update.ts";
 export { noPropertyNamedLikeLifecycle } from "./no-property-named-like-lifecycle.ts";
-export { noReflectOnComplexProperty } from "./no-reflect-on-complex-property.ts";
 export { noRequestUpdateInUpdated } from "./no-request-update-in-updated.ts";
 export { noScriptInTemplate } from "./no-script-in-template.ts";
 export { noSelfClosingNonVoid } from "./no-self-closing-non-void.ts";
-export { noTemplateResultInAttribute } from "./no-template-result-in-attribute.ts";
 export { noThisAssignInRender } from "./no-this-assign-in-render.ts";
 export { noThisInStaticStyles } from "./no-this-in-static-styles.ts";
 export { noUnsafeCss } from "./no-unsafe-css.ts";
@@ -175,9 +170,11 @@ export { noValueAttribute } from "./no-value-attribute.ts";
 export { preferStaticStyles } from "./prefer-static-styles.ts";
 export { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 export { requireContextType } from "./require-context-type.ts";
+export { requireDashedTag } from "./require-dashed-tag.ts";
 export { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 export { requirePropertyType } from "./require-property-type.ts";
 export { requireRepeatKey } from "./require-repeat-key.ts";
+export { requireScalarReflect } from "./require-scalar-reflect.ts";
 export { simpleTemplateExpressions } from "./simple-template-expressions.ts";
 export { svgTemplateForSvgContent } from "./svg-template-for-svg-content.ts";
 export { valueAfterConstraints } from "./value-after-constraints.ts";

@@ -21,7 +21,7 @@ function objectKeyName(key: Deno.lint.Property["key"]): string | null {
 
 /** Whether a member name reads as private. */
 function isPrivateName(name: string): boolean {
-  return name.startsWith("#") || name.startsWith("_");
+  return name.startsWith("#");
 }
 
 /**

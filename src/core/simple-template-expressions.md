@@ -80,5 +80,5 @@ class Good extends LitElement {
 - This rule subsumes upstream `no-template-arrow`, `no-template-bind`, and
   `no-template-map`; those are not separate rules here.
 - Which directives may be imported at all is governed by
-  `lit-disciplined/directive-allowlist`. Being on that allowlist does not buy a
+  `lit-strict/directive-allowlist`. Being on that allowlist does not buy a
   directive a place inside a template.

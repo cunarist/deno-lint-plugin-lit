@@ -7,13 +7,21 @@
  * request. A `Symbol` is unique by construction and cannot collide.
  */
 
-import { memberPath } from "#helpers";
+import { importedLocalName, isContextModule, memberPath } from "#helpers";
 
-/** Whether a call is `createContext(…)`, including through a namespace. */
-function isCreateContextCall(node: Deno.lint.CallExpression): boolean {
+/**
+ * Whether a call goes to `createContext` imported from `@lit/context`.
+ *
+ * The local binding is required: without it the rule reports any function
+ * called `createContext`, React's included.
+ */
+function isCreateContextCall(
+  node: Deno.lint.CallExpression,
+  locals: ReadonlySet<string>,
+): boolean {
   const path = memberPath(node.callee);
   if (path === null) return false;
-  return (path.split(".").pop() ?? path) === "createContext";
+  return locals.has(path);
 }
 
 /**
@@ -21,9 +29,17 @@ function isCreateContextCall(node: Deno.lint.CallExpression): boolean {
  */
 export const noStringContextKey: Deno.lint.Rule = {
   create(ctx) {
+    /** Local names bound to `createContext` from the module we mean. */
+    const locals = new Set<string>();
+
     return {
+      ImportDeclaration(node) {
+        const local = importedLocalName(node, isContextModule, "createContext");
+        if (local !== null) locals.add(local);
+      },
+
       CallExpression(node) {
-        if (!isCreateContextCall(node)) return;
+        if (!isCreateContextCall(node, locals)) return;
         const key = node.arguments[0];
         if (!key || key.type !== "Literal") return;
         if (typeof key.value !== "string") return;

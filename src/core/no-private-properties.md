@@ -1,37 +1,36 @@
 # no-private-properties
 
-Rejects `@property` on a field whose name reads as private — `#count` or
-`_count`.
+Rejects `@property` on a field declared with a `#` private name.
 
 ## Why
 
-`@property` declares part of a component's public API: an observed attribute
-that any markup can set. Naming the field private and then exposing it as an
-attribute contradicts itself, and the attribute is live whether you intended it
-or not — outside markup can write to what the name says is internal state.
-`@state` gives the same reactivity with no attribute.
+`#count` is private at the language level: nothing outside the class can read or
+write it, and the runtime enforces that. `@property` declares the opposite — a
+public attribute that markup and parent components are expected to set. The two
+statements contradict each other, and the attribute wins in the sense that Lit
+still creates it, pointing at a field no one can reach.
 
 ## Examples
 
 ```ts
 // BAD
 class El extends LitElement {
-  @property()
-  _open = false;
+  @property({ type: Boolean })
+  accessor #open = false;
 }
 
 // GOOD
 class El extends LitElement {
   @state()
-  accessor _open = false;
+  accessor #open = false;
 }
 ```
 
 ## Notes
 
-- Both private spellings are checked: a leading `#` and a leading `_`.
-- `@state` on a private name is the fix, and is never flagged.
-- Undecorated private fields are ignored entirely.
+- Only the `#` spelling is checked. A leading underscore is a convention, not a
+  language feature — some codebases use `_id` for a genuinely public field, so
+  keying on it would report correct code.
+- `@state` on a `#` field is correct and never reported: internal reactive state
+  is exactly what a private name is for.
 - Entries of a `static properties` object are checked the same way.
-- The rule matches on the name only. It does not check whether the field is
-  actually used privately.

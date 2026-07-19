@@ -1,5 +1,5 @@
 /**
- * `no-reflect-on-complex-property`
+ * `require-scalar-reflect`
  *
  * `reflect: true` asks Lit to write the property back out to the attribute on
  * every change, using the converter's `toAttribute`. For `Object` and `Array`
@@ -16,7 +16,15 @@ import { classMembers, findDecorator, isLitComponent, keyName } from "#helpers";
 type ClassNode = Deno.lint.ClassDeclaration | Deno.lint.ClassExpression;
 
 /** Converters whose `toAttribute` is `JSON.stringify`. */
-const COMPLEX_TYPES: readonly string[] = ["Object", "Array"];
+/**
+ * Converters that produce an attribute a browser can round-trip.
+ *
+ * The test is inverted on purpose: reflection is rejected unless the options
+ * prove the value is one of these. Listing the complex converters instead let
+ * the worst case through — `{reflect: true}` with no `type` at all, where the
+ * identity converter writes `[object Object]` into the DOM.
+ */
+const SCALAR_TYPES: readonly string[] = ["String", "Number", "Boolean"];
 
 /** Name of an object-literal key. */
 function objectKeyName(key: Deno.lint.Property["key"]): string | null {
@@ -50,41 +58,46 @@ function decoratorOptions(
 }
 
 /**
- * The offending `reflect: true` entry, when the same options object also names
- * a complex converter. Returns the complex type name alongside it.
+ * The offending `reflect: true` entry, when nothing in the options proves the
+ * reflected value is a scalar.
  */
 function violation(
   options: Deno.lint.Expression | null,
-): { node: Deno.lint.Property; type: string } | null {
+): { node: Deno.lint.Property } | null {
   const reflect = optionEntry(options, "reflect");
   if (!reflect) return null;
   const flag = reflect.value as Deno.lint.Expression;
   if (flag.type !== "Literal" || flag.value !== true) return null;
 
-  const type = optionEntry(options, "type");
-  if (!type) return null;
-  const converter = type.value as Deno.lint.Expression;
-  if (converter.type !== "Identifier") return null;
-  if (!COMPLEX_TYPES.includes(converter.name)) return null;
+  // A custom converter decides its own attribute form; take its word for it.
+  if (optionEntry(options, "converter")) return null;
 
-  return { node: reflect, type: converter.name };
+  const type = optionEntry(options, "type");
+  if (!type) return { node: reflect };
+
+  const converter = type.value as Deno.lint.Expression;
+  // A `type` we cannot read — `TYPES.obj`, a variable — is not evidence.
+  if (converter.type !== "Identifier") return { node: reflect };
+  if (SCALAR_TYPES.includes(converter.name)) return null;
+
+  return { node: reflect };
 }
 
 /**
  * Rejects `reflect: true` combined with `{type: Object}` or `{type: Array}`.
  */
-export const noReflectOnComplexProperty: Deno.lint.Rule = {
+export const requireScalarReflect: Deno.lint.Rule = {
   create(ctx) {
     function report(
-      found: { node: Deno.lint.Property; type: string },
+      found: { node: Deno.lint.Property },
       name: string,
     ): void {
       ctx.report({
         node: found.node,
         message:
-          `Property "${name}" reflects a ${found.type} to its attribute.`,
+          `Property "${name}" reflects a value that is not a declared scalar.`,
         hint:
-          "Reflection JSON-stringifies the value into the DOM and re-parses it back to a new identity, which can loop. Drop reflect, or reflect a scalar derived from it.",
+          "Reflection writes the value into the DOM as a string. Declare type: String, Number or Boolean, supply a converter, or drop reflect.",
       });
     }
 

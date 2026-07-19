@@ -25,6 +25,13 @@ export class PathBar extends LitElement {}
 
 ## Notes
 
+- A trailing `Element` on the class is stripped before comparing, so
+  `cl-path-bar` accepts both `PathBar` and `PathBarElement`. That keeps this
+  rule and `require-element-suffix` from contradicting each other.
+- The prefix is not known — a lint rule takes no options — so any leading
+  segments are accepted. The rule asks whether _some_ suffix of the tag names
+  the class, which means `cl-path-bar` also accepts `Bar`. It catches a tag
+  naming a different class, not every loose correspondence.
 - Any number of leading prefix segments is accepted, because there is no
   configuration to name yours: `cl-path-bar` matches `PathBar` and
   `cl-md-slash-menu` matches `SlashMenu`. A tag with no prefix at all,

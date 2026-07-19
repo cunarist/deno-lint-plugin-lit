@@ -13,14 +13,15 @@ Lint rules for [Lit](https://lit.dev) Web Components, for `deno lint`.
 }
 ```
 
-Four plugins. Each says something different about the code it rejects:
+Five plugins. Each says something different about the code it rejects:
 
 | Plugin                 | Says                                              | Rules |
 | ---------------------- | ------------------------------------------------- | ----- |
-| `/core`                | This does not do what it looks like it does.      | 54    |
-| `/strict`              | Demanding, but we think you should.               | 19    |
+| `/core`                | This does not do what it looks like it does.      | 53    |
+| `/strict`              | Demanding, but we think you should.               | 18    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
-| `/reactive-controller` | Anything with a lifetime belongs in a controller. | 9     |
+| `/reactive-controller` | Anything with a lifetime belongs in a controller. | 6     |
+| `/naming`              | What elements and controllers are called.         | 4     |
 
 Add the ones you want:
 
@@ -67,7 +68,8 @@ export default plugin;
 ```
 
 Each entry point exports its rules individually plus the whole group as one
-record: `coreRules`, `strictRules`, `domRefRules`, `reactiveControllerRules`.
+record: `coreRules`, `strictRules`, `domRefRules`, `reactiveControllerRules`,
+`namingRules`.
 
 ## `/core`
 
@@ -122,17 +124,14 @@ description rather than a program.
 | [`no-legacy-template-syntax`](src/core/no-legacy-template-syntax.md)                           | Polymer-style `[[oneWay]]` and `{{twoWay}}` bindings inside an `html` template                                          |
 | [`no-multiple-default-slots`](src/core/no-multiple-default-slots.md)                           | two or more unnamed `<slot>` elements in one template                                                                   |
 | [`no-native-attributes`](src/core/no-native-attributes.md)                                     | a reactive property named after a global HTML attribute                                                                 |
-| [`no-object-attribute-binding`](src/core/no-object-attribute-binding.md)                       | an object or array literal bound to a plain attribute                                                                   |
 | [`no-partial-property-binding`](src/core/no-partial-property-binding.md)                       | a property, event or boolean binding that is not the entire attribute value                                             |
-| [`no-private-properties`](src/core/no-private-properties.md)                                   | `@property` on a field whose name reads as private — `#count` or `_count`                                               |
+| [`no-private-properties`](src/core/no-private-properties.md)                                   | `@property` on a field declared with a `#` private name                                                                 |
 | [`no-property-change-in-updated`](src/core/no-property-change-in-updated.md)                   | assigning to a reactive property inside `updated()` or `firstUpdated()`                                                 |
 | [`no-property-change-update`](src/core/no-property-change-update.md)                           | assigning to a reactive property inside `update()`                                                                      |
 | [`no-property-named-like-lifecycle`](src/core/no-property-named-like-lifecycle.md)             | a class field or reactive property named after a Lit lifecycle member                                                   |
-| [`no-reflect-on-complex-property`](src/core/no-reflect-on-complex-property.md)                 | `reflect: true` combined with `{type: Object}` or `{type: Array}`                                                       |
 | [`no-request-update-in-updated`](src/core/no-request-update-in-updated.md)                     | calling `this.requestUpdate()` inside `updated()` or `firstUpdated()`                                                   |
 | [`no-script-in-template`](src/core/no-script-in-template.md)                                   | a `<script>` element inside a Lit template                                                                              |
 | [`no-self-closing-non-void`](src/core/no-self-closing-non-void.md)                             | self-closing syntax on a non-void element in a template                                                                 |
-| [`no-template-result-in-attribute`](src/core/no-template-result-in-attribute.md)               | a template bound into attribute position                                                                                |
 | [`no-this-assign-in-render`](src/core/no-this-assign-in-render.md)                             | assigning to anything reached through `this` inside `render()`                                                          |
 | [`no-this-in-static-styles`](src/core/no-this-in-static-styles.md)                             | `this` inside a `static styles` initialiser                                                                             |
 | [`no-unsafe-css`](src/core/no-unsafe-css.md)                                                   | `unsafeCSS` imported from Lit — both the import specifier and every call site                                           |
@@ -142,9 +141,11 @@ description rather than a program.
 | [`prefer-static-styles`](src/core/prefer-static-styles.md)                                     | a `<style>` element inside an `html` template                                                                           |
 | [`require-accessor-with-decorators`](src/core/require-accessor-with-decorators.md)             | a `@property` or `@state` decorator on a plain class field instead of an `accessor` field                               |
 | [`require-context-type`](src/core/require-context-type.md)                                     | Missing: `createContext()` from `@lit/context` to be given an explicit type argument                                    |
+| [`require-dashed-tag`](src/core/require-dashed-tag.md)                                         | a custom element name the registry will not accept                                                                      |
 | [`require-dispatch-on-this`](src/core/require-dispatch-on-this.md)                             | Missing: a component's events to be dispatched on the component itself                                                  |
 | [`require-property-type`](src/core/require-property-type.md)                                   | Missing: `{type: …}` on every `@property` that has an attribute                                                         |
 | [`require-repeat-key`](src/core/require-repeat-key.md)                                         | `repeat(items, template)` — the two-argument form, with no key function                                                 |
+| [`require-scalar-reflect`](src/core/require-scalar-reflect.md)                                 | `reflect: true` unless the options prove the value is a scalar                                                          |
 | [`simple-template-expressions`](src/core/simple-template-expressions.md)                       | Every `${…}` binding in an `html` template must be an identifier, `this`, or a non-computed member chain — nothing else |
 | [`svg-template-for-svg-content`](src/core/svg-template-for-svg-content.md)                     | SVG-only elements written directly in an `html` template with no enclosing `<svg>`                                      |
 | [`value-after-constraints`](src/core/value-after-constraints.md)                               | a `value` binding that appears before a validity constraint attribute on the same form control                          |
@@ -156,27 +157,26 @@ few will fire on code that works. `createContext("key")` is valid Lit. A class
 registered from a barrel file looks unregistered here. Light DOM is a real Lit
 feature that this ruleset declines to use.
 
-| Rule                                                                                           | Catches                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`attribute-names`](src/strict/attribute-names.md)                                             | a camelCase reactive property that does not declare an explicit `attribute` option                                                                                                                                                                                       |
-| [`directive-allowlist`](src/strict/directive-allowlist.md)                                     | every import from a Lit `directives/` module except `lit/directives/ref.js` and `lit/directives/repeat.js`                                                                                                                                                               |
-| [`no-boolean-property-default-true`](src/strict/no-boolean-property-default-true.md)           | a boolean reactive property initialised to `true`                                                                                                                                                                                                                        |
-| [`no-component-disposables`](src/strict/no-component-disposables.md)                           | constructing `AbortController`, `EventSource`, `IntersectionObserver`, `MutationObserver`, `ResizeObserver`, `WebSocket`, or `Worker` inside a Lit component, and rejects calling `addEventListener`, `removeEventListener`, `destroy`, `disconnect`, or `dispose` there |
-| [`no-event-target-subclass`](src/strict/no-event-target-subclass.md)                           | a class that extends `EventTarget`                                                                                                                                                                                                                                       |
-| [`no-fetch-in-component`](src/strict/no-fetch-in-component.md)                                 | a `fetch(...)` call inside a Lit component class                                                                                                                                                                                                                         |
-| [`no-light-dom`](src/strict/no-light-dom.md)                                                   | `createRenderRoot()` returning `this`, which renders the component into the light DOM                                                                                                                                                                                    |
-| [`no-manual-update`](src/strict/no-manual-update.md)                                           | `requestUpdate`, `performUpdate`, and `scheduleUpdate` unless called on `this.host` or `this.#host`                                                                                                                                                                      |
-| [`no-property-assignment-in-constructor`](src/strict/no-property-assignment-in-constructor.md) | assigning a reactive property inside `constructor()`                                                                                                                                                                                                                     |
-| [`no-string-context-key`](src/strict/no-string-context-key.md)                                 | a string literal as the key passed to `createContext()`                                                                                                                                                                                                                  |
-| [`no-timers`](src/strict/no-timers.md)                                                         | `setTimeout`, `setInterval`, `requestAnimationFrame`, and `queueMicrotask` inside a Lit component                                                                                                                                                                        |
-| [`no-update-complete`](src/strict/no-update-complete.md)                                       | any access to `updateComplete`                                                                                                                                                                                                                                           |
-| [`prefer-context-decorators`](src/strict/prefer-context-decorators.md)                         | constructing a `ContextProvider` or `ContextConsumer` by hand inside a Lit component                                                                                                                                                                                     |
-| [`prefer-decorators`](src/strict/prefer-decorators.md)                                         | a `static properties` declaration on a Lit component                                                                                                                                                                                                                     |
-| [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | Missing: every `LitElement` subclass in a file to be registered, either with `@customElement` or with `customElements.define`                                                                                                                                            |
-| [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file                                                                                                                                                      |
-| [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file                                                                                                                                                         |
-| [`static-styles-css-literal`](src/strict/static-styles-css-literal.md)                         | A `static styles` member must be a direct `css` tagged template — not an array, a reference, a call, or a getter                                                                                                                                                         |
-| [`tag-matches-class-name`](src/strict/tag-matches-class-name.md)                               | a `@customElement` tag whose segments, after any leading prefix, do not PascalCase to the class name                                                                                                                                                                     |
+| Rule                                                                                           | Catches                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`attribute-names`](src/strict/attribute-names.md)                                             | a camelCase reactive property that does not declare an explicit `attribute` option                                                                                                                                                                                             |
+| [`directive-allowlist`](src/strict/directive-allowlist.md)                                     | every import from a Lit `directives/` module except `lit/directives/ref.js` and `lit/directives/repeat.js`                                                                                                                                                                     |
+| [`no-boolean-property-default-true`](src/strict/no-boolean-property-default-true.md)           | a boolean reactive property whose default is not literal `false`                                                                                                                                                                                                               |
+| [`no-component-disposables`](src/strict/no-component-disposables.md)                           | constructing `AbortController`, `EventSource`, `IntersectionObserver`, `MutationObserver`, `ResizeObserver`, `WebSocket`, or `Worker` inside a Lit component, and rejects calling `addEventListener`, `removeEventListener`, `addEventListener` or `removeEventListener` there |
+| [`no-event-target-subclass`](src/strict/no-event-target-subclass.md)                           | a class that extends `EventTarget`                                                                                                                                                                                                                                             |
+| [`no-fetch-in-component`](src/strict/no-fetch-in-component.md)                                 | a `fetch(...)` call inside a Lit component class                                                                                                                                                                                                                               |
+| [`no-light-dom`](src/strict/no-light-dom.md)                                                   | `createRenderRoot()` returning `this`, which renders the component into the light DOM                                                                                                                                                                                          |
+| [`no-manual-update`](src/strict/no-manual-update.md)                                           | `requestUpdate`, `performUpdate`, and `scheduleUpdate` unless called on `this.host` or `this.#host`                                                                                                                                                                            |
+| [`no-property-assignment-in-constructor`](src/strict/no-property-assignment-in-constructor.md) | assigning a reactive property inside `constructor()`                                                                                                                                                                                                                           |
+| [`no-string-context-key`](src/strict/no-string-context-key.md)                                 | a string literal as the key passed to `createContext()`                                                                                                                                                                                                                        |
+| [`no-timers`](src/strict/no-timers.md)                                                         | `setTimeout`, `setInterval`, `requestAnimationFrame`, and `queueMicrotask` inside a Lit component                                                                                                                                                                              |
+| [`no-update-complete`](src/strict/no-update-complete.md)                                       | any access to `updateComplete`                                                                                                                                                                                                                                                 |
+| [`prefer-context-decorators`](src/strict/prefer-context-decorators.md)                         | constructing a `ContextProvider` or `ContextConsumer` by hand inside a Lit component                                                                                                                                                                                           |
+| [`prefer-decorators`](src/strict/prefer-decorators.md)                                         | a `static properties` declaration on a Lit component                                                                                                                                                                                                                           |
+| [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | Missing: every `LitElement` subclass in a file to be registered, either with `@customElement` or with `customElements.define`                                                                                                                                                  |
+| [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file                                                                                                                                                            |
+| [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file                                                                                                                                                               |
+| [`static-styles-css-literal`](src/strict/static-styles-css-literal.md)                         | A `static styles` member must be a direct `css` tagged template — not an array, a reference, a call, or a getter                                                                                                                                                               |
 
 ## `/dom-ref`
 
@@ -255,17 +255,26 @@ Components keep only `styles` and `render`. Everything else — listeners, timer
 sockets, fetches — moves here, where `hostConnected` and `hostDisconnected` sit
 next to each other.
 
-| Rule                                                                                          | Catches                                                                                              |
-| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| [`construction-args`](src/reactive-controller/construction-args.md)                           | a host constructing a controller with anything other than exactly `this`                             |
-| [`host-constructor`](src/reactive-controller/host-constructor.md)                             | a controller constructor that is not exactly `constructor(host: ReactiveControllerHost)`             |
-| [`implements-reactive-controller`](src/reactive-controller/implements-reactive-controller.md) | a class that behaves like a reactive controller but does not declare `implements ReactiveController` |
-| [`lifecycle-allowlist`](src/reactive-controller/lifecycle-allowlist.md)                       | any lifecycle override on a Lit component other than `styles` and `render`                           |
-| [`no-controller-references`](src/reactive-controller/no-controller-references.md)             | a controller that names, constructs, accepts, or forwards another reactive controller                |
-| [`no-unused-host`](src/reactive-controller/no-unused-host.md)                                 | a controller that stores `host` or `#host` as a field but never reads it                             |
-| [`paired-lifecycle`](src/reactive-controller/paired-lifecycle.md)                             | a controller that defines `hostConnected` or `hostDisconnected` but not both                         |
-| [`require-abort-signal-in-fetch`](src/reactive-controller/require-abort-signal-in-fetch.md)   | a `fetch(...)` inside a reactive controller that passes no `signal` option                           |
-| [`self-registration`](src/reactive-controller/self-registration.md)                           | a controller that does not call `host.addController(this)` in its constructor                        |
+| Rule                                                                                        | Catches                                                                                  |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`host-constructor`](src/reactive-controller/host-constructor.md)                           | a controller constructor that is not exactly `constructor(host: ReactiveControllerHost)` |
+| [`lifecycle-allowlist`](src/reactive-controller/lifecycle-allowlist.md)                     | any lifecycle override on a Lit component other than `styles` and `render`               |
+| [`no-unused-host`](src/reactive-controller/no-unused-host.md)                               | a controller that stores `host` or `#host` as a field but never reads it                 |
+| [`paired-lifecycle`](src/reactive-controller/paired-lifecycle.md)                           | a controller that defines `hostConnected` or `hostDisconnected` but not both             |
+| [`require-abort-signal-in-fetch`](src/reactive-controller/require-abort-signal-in-fetch.md) | a `fetch(...)` inside a reactive controller that passes no `signal` option               |
+| [`self-registration`](src/reactive-controller/self-registration.md)                         | a controller that does not call `host.addController(this)` in its constructor            |
+
+## `/naming`
+
+Pure convention — nothing here changes what the code does. The point is that a
+reader can tell an element from a controller from a plain class at a glance.
+
+| Rule                                                                   | Catches                                                                                              |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`require-controller-suffix`](src/naming/require-controller-suffix.md) | Missing: a reactive controller class name to end in `Controller`                                     |
+| [`require-element-suffix`](src/naming/require-element-suffix.md)       | Missing: a registered component class name to end in `Element`                                       |
+| [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | Missing: a custom element name to carry a namespace segment                                          |
+| [`tag-matches-class-name`](src/naming/tag-matches-class-name.md)       | a `@customElement` tag whose segments, after any leading prefix, do not PascalCase to the class name |
 
 ## Known limits
 

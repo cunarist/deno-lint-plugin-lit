@@ -41,5 +41,5 @@ class El extends LitElement {
   `try`. A conditional call satisfies the rule.
 - The call must chain to the same method. `connectedCallback()` calling
   `super.disconnectedCallback()` still fires.
-- Under the `disciplined` config, `lifecycle-allowlist` bans these overrides
-  outright, which makes this rule dead code there.
+- `lit-reactive-controller/lifecycle-allowlist` bans most of these overrides
+  outright. With that plugin on, this rule has little left to catch.

@@ -10,12 +10,9 @@ converter, so `<my-el count="3">` leaves `count` holding `"3"` and
 `this.count + 1` is `"31"`. TypeScript cannot see this: the field is declared
 `number` and the wrong value arrives at runtime.
 
-The check is syntactic — it asks whether `type` is written, not what the
-property's declared type is. An earlier version inferred the type from the
-initialiser, which meant it passed `accessor count: number;` and
-`accessor total: Count;` — the cases where the mistake is easiest to make and
-hardest to spot. A rule that is right about a narrow slice and silent elsewhere
-is worse than one that always asks.
+The rule asks only whether `type` is written; it does not try to work out what
+the property holds. Inferring that would mean giving up on aliases, imported
+types and generics — the cases where the mistake is hardest to spot.
 
 ## Examples
 

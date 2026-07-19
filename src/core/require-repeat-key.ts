@@ -13,7 +13,7 @@
  * `simple-template-expressions` requires it to be hoisted into a local.
  */
 
-import { memberPath } from "#helpers";
+import { importedLocalName, isRepeatModule, memberPath } from "#helpers";
 
 /**
  * Rejects `repeat(items, template)` — the two-argument form, with no key
@@ -21,9 +21,18 @@ import { memberPath } from "#helpers";
  */
 export const requireRepeatKey: Deno.lint.Rule = {
   create(ctx) {
+    /** Local names bound to `repeat` from the module we mean. */
+    const locals = new Set<string>();
+
     return {
+      ImportDeclaration(node) {
+        const local = importedLocalName(node, isRepeatModule, "repeat");
+        if (local !== null) locals.add(local);
+      },
+
       CallExpression(node) {
-        if (memberPath(node.callee) !== "repeat") return;
+        const callee = memberPath(node.callee);
+        if (callee === null || !locals.has(callee)) return;
         if (node.arguments.length !== 2) return;
         // A spread could supply the key at runtime; the arity is unknowable.
         if (node.arguments.some((arg) => arg.type === "SpreadElement")) return;

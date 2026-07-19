@@ -7,13 +7,13 @@
  * fine; defining one is not.
  */
 
-import { isLitComponent, keyName, looksLikeReactiveController } from "#helpers";
+import { isLitComponent, isReactiveController, keyName } from "#helpers";
 
 /** A class in scope for the controller rules. */
 function isControllerClass(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
-  return !isLitComponent(node) && looksLikeReactiveController(node);
+  return !isLitComponent(node) && isReactiveController(node);
 }
 
 /**

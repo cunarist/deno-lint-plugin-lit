@@ -1,6 +1,6 @@
 /** Lit-specific detection helpers. */
 
-import { classDecorators, keyName, memberPath } from "./ast.ts";
+import { classDecorators, memberPath } from "./ast.ts";
 
 /** Module specifiers that count as "the Lit core" for import checks. */
 export const LIT_CORE_SOURCES: readonly string[] = [
@@ -69,23 +69,20 @@ export function hasReactiveControllerInterface(
 }
 
 /**
- * Heuristic for "this class is a reactive controller" that does not depend on
- * the `implements` clause — needed by the rule that requires that clause.
+ * Whether a class is a reactive controller.
+ *
+ * The only signal is the `implements ReactiveController` clause. Earlier this
+ * also accepted a class name ending in `Controller`, which reported plain
+ * classes called `GameController` and stayed silent on a controller called
+ * anything else. A declaration the author wrote is a fact; a name is a guess.
+ *
+ * The cost is that a controller which omits the clause is never checked. That
+ * is the honest trade: these rules apply to classes that declare themselves.
  */
-export function looksLikeReactiveController(
+export function isReactiveController(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
-  if (hasReactiveControllerInterface(node)) return true;
-  const name = node.id?.name ?? "";
-  if (name.endsWith("Controller")) return true;
-  for (const member of node.body.body) {
-    if (member.type !== "MethodDefinition") continue;
-    const memberName = keyName(member.key);
-    if (memberName === "hostConnected" || memberName === "hostDisconnected") {
-      return true;
-    }
-  }
-  return false;
+  return hasReactiveControllerInterface(node);
 }
 
 /** Whether a tagged template uses the given tag name (`html` or `css`). */
@@ -143,4 +140,45 @@ export function isReactiveProperty(
     }
   }
   return false;
+}
+
+/**
+ * The local name bound to a named import, when the module specifier matches.
+ *
+ * Rules that key on a bare call — `repeat(...)`, `createContext(...)` — must
+ * confirm the name came from the module they mean. Without it the rule fires on
+ * any unrelated function that happens to share the name.
+ */
+export function importedLocalName(
+  node: Deno.lint.ImportDeclaration,
+  matchesSource: (source: string) => boolean,
+  importedName: string,
+): string | null {
+  const source = node.source.value;
+  if (typeof source !== "string" || !matchesSource(source)) return null;
+  for (const specifier of node.specifiers) {
+    // `import * as ns from "…"` binds every export under `ns.`.
+    if (specifier.type === "ImportNamespaceSpecifier") {
+      return `${specifier.local.name}.${importedName}`;
+    }
+    if (specifier.type !== "ImportSpecifier") continue;
+    const imported = specifier.imported;
+    const name = imported.type === "Identifier"
+      ? imported.name
+      : typeof imported.value === "string"
+      ? imported.value
+      : null;
+    if (name === importedName) return specifier.local.name;
+  }
+  return null;
+}
+
+/** Whether a specifier is Lit's `repeat` directive module. */
+export function isRepeatModule(source: string): boolean {
+  return /^(?:lit|lit-html|lit-element)\/directives\/repeat\.js$/.test(source);
+}
+
+/** Whether a specifier is the `@lit/context` package. */
+export function isContextModule(source: string): boolean {
+  return source === "@lit/context";
 }

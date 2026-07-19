@@ -1,4 +1,4 @@
-import { tagMatchesClassName } from "#strict";
+import { tagMatchesClassName } from "#naming";
 
 import {
   assertInvalid,
