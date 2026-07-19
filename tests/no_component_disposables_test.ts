@@ -63,21 +63,6 @@ Deno.test("no-component-disposables: rejects each disposable method", () => {
   }
 });
 
-Deno.test("no-component-disposables: rejects stream methods", () => {
-  assertInvalid(
-    plugin,
-    "class A extends LitElement { go() { api.streamFileWatch(this.#onEvent); } }",
-  );
-  assertInvalid(
-    plugin,
-    "class A extends LitElement { go() { api.streamTaskProgress(); } }",
-  );
-});
-
-Deno.test("no-component-disposables: allows a plain `stream` call", () => {
-  assertValid(plugin, "class A extends LitElement { go() { api.stream(); } }");
-});
-
 Deno.test("no-component-disposables: highlights the constructor", () => {
   const code =
     "class A extends LitElement { go() { this.#x = new ResizeObserver(this.#onResize); } }";

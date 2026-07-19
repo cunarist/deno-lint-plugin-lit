@@ -2,7 +2,7 @@
  * `no-component-disposables`
  *
  * A component renders; it does not own resources. Anything with a lifetime —
- * an observer, a socket, a worker, a listener, a stream — must live in a
+ * an observer, a socket, a worker, a listener — must live in a
  * `ReactiveController` that releases it in `hostDisconnected`, so acquisition
  * and release sit in one file.
  */
@@ -44,17 +44,12 @@ function lastSegment(path: string | null): string | null {
   return path.split(".").pop() ?? path;
 }
 
-/** Whether a method name opens a long-lived stream, e.g. `streamFileWatch`. */
-function isStreamMethod(name: string): boolean {
-  return name.startsWith("stream") && name.length > "stream".length;
-}
-
 /**
  * Rejects constructing `AbortController`, `EventSource`,
  * `IntersectionObserver`, `MutationObserver`, `ResizeObserver`, `WebSocket`,
  * or `Worker` inside a Lit component, and rejects calling
  * `addEventListener`, `removeEventListener`, `destroy`, `disconnect`,
- * `dispose`, or any `stream*` method there.
+ * or `dispose` there.
  */
 export const noComponentDisposables: Deno.lint.Rule = {
   create(ctx) {
@@ -75,7 +70,7 @@ export const noComponentDisposables: Deno.lint.Rule = {
         const property = callee.property;
         if (property.type !== "Identifier") return;
         const name = property.name;
-        if (!DISPOSABLE_METHODS.includes(name) && !isStreamMethod(name)) return;
+        if (!DISPOSABLE_METHODS.includes(name)) return;
         if (!inLitComponent(node)) return;
         ctx.report({
           node: callee,

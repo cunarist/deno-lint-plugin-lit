@@ -43,3 +43,14 @@ import { repeat } from "lit/directives/repeat.js";
 - Replacing `classMap` and `styleMap` is the cost most people feel. Build the
   string or use `static styles` with reactive-property-driven attribute
   selectors.
+- `ifDefined` is the other one worth naming. It exists to drop an attribute when
+  the value is `undefined`, and it is implemented as `value ?? nothing`. Write
+  that yourself and hoist it:
+
+  ```ts
+  const src = this.src ?? nothing;
+  return html`<img src=${src}>`;
+  ```
+
+  This ruleset does not ban `nothing`, precisely so that this replacement
+  exists.

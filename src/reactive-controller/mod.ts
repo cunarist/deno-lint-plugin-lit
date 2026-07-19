@@ -10,8 +10,6 @@ import { hostConstructor } from "./host-constructor.ts";
 import { implementsReactiveController } from "./implements-reactive-controller.ts";
 import { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
 import { noControllerReferences } from "./no-controller-references.ts";
-import { noSelfSync } from "./no-self-sync.ts";
-import { noSyncInRender } from "./no-sync-in-render.ts";
 import { noUnusedHost } from "./no-unused-host.ts";
 import { pairedLifecycle } from "./paired-lifecycle.ts";
 import { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";
@@ -24,8 +22,6 @@ export const reactiveControllerRules: Record<string, Deno.lint.Rule> = {
   "implements-reactive-controller": implementsReactiveController,
   "lifecycle-allowlist": lifecycleAllowlist,
   "no-controller-references": noControllerReferences,
-  "no-self-sync": noSelfSync,
-  "no-sync-in-render": noSyncInRender,
   "no-unused-host": noUnusedHost,
   "paired-lifecycle": pairedLifecycle,
   "require-abort-signal-in-fetch": requireAbortSignalInFetch,
@@ -47,8 +43,6 @@ export { hostConstructor } from "./host-constructor.ts";
 export { implementsReactiveController } from "./implements-reactive-controller.ts";
 export { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
 export { noControllerReferences } from "./no-controller-references.ts";
-export { noSelfSync } from "./no-self-sync.ts";
-export { noSyncInRender } from "./no-sync-in-render.ts";
 export { noUnusedHost } from "./no-unused-host.ts";
 export { pairedLifecycle } from "./paired-lifecycle.ts";
 export { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";

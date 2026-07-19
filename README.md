@@ -20,7 +20,7 @@ Four plugins. Each says something different about the code it rejects:
 | `/core`                | This does not do what it looks like it does.      | 55    |
 | `/strict`              | Demanding, but we think you should.               | 19    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
-| `/reactive-controller` | Anything with a lifetime belongs in a controller. | 11    |
+| `/reactive-controller` | Anything with a lifetime belongs in a controller. | 9     |
 
 Add the ones you want:
 
@@ -263,8 +263,6 @@ next to each other.
 | [`implements-reactive-controller`](src/reactive-controller/implements-reactive-controller.md) | a class that behaves like a reactive controller but does not declare `implements ReactiveController` |
 | [`lifecycle-allowlist`](src/reactive-controller/lifecycle-allowlist.md)                       | any lifecycle override on a Lit component other than `styles` and `render`                           |
 | [`no-controller-references`](src/reactive-controller/no-controller-references.md)             | a controller that names, constructs, accepts, or forwards another reactive controller                |
-| [`no-self-sync`](src/reactive-controller/no-self-sync.md)                                     | a controller calling its own `sync*` method through `this`                                           |
-| [`no-sync-in-render`](src/reactive-controller/no-sync-in-render.md)                           | a host component calling `this.#someController.sync*()` from `render()`                              |
 | [`no-unused-host`](src/reactive-controller/no-unused-host.md)                                 | a controller that stores `host` or `#host` as a field but never reads it                             |
 | [`paired-lifecycle`](src/reactive-controller/paired-lifecycle.md)                             | a controller that defines `hostConnected` or `hostDisconnected` but not both                         |
 | [`require-abort-signal-in-fetch`](src/reactive-controller/require-abort-signal-in-fetch.md)   | a `fetch(...)` inside a reactive controller that passes no `signal` option                           |

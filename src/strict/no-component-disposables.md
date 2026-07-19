@@ -3,7 +3,7 @@
 Rejects constructing `AbortController`, `EventSource`, `IntersectionObserver`,
 `MutationObserver`, `ResizeObserver`, `WebSocket`, or `Worker` inside a Lit
 component, and rejects calling `addEventListener`, `removeEventListener`,
-`destroy`, `disconnect`, `dispose`, or any `stream*` method there.
+`destroy`, `disconnect`, or `dispose` there.
 
 ## Why
 
@@ -44,10 +44,6 @@ class SizeController {
 
 - Only fires inside a Lit component class body. The identical code in a
   controller is exactly what the rule wants.
-- `stream*` means the literal prefix `stream` plus at least one more character,
-  so `api.streamFileWatch(...)` and `api.streamTaskProgress()` are rejected but
-  a bare `api.stream()` is allowed. The assumption is that a named stream opens
-  a subscription while a bare `stream()` is a one-shot.
 - Method matching is by name only, on any receiver. A `dispose()` or
   `disconnect()` that has nothing to do with resources will still fire if it is
   called from a component.
