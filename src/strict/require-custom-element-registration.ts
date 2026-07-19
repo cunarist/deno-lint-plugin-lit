@@ -45,6 +45,10 @@ function isDefineCall(node: Deno.lint.CallExpression): boolean {
     path.endsWith(".customElements.define");
 }
 
+/**
+ * Requires every `LitElement` subclass in a file to be registered, either
+ * with `@customElement` or with `customElements.define`.
+ */
 export const requireCustomElementRegistration: Deno.lint.Rule = {
   create(ctx) {
     const candidates: Candidate[] = [];

@@ -18,6 +18,10 @@ function lastSegment(path: string): string {
   return path.split(".").pop() ?? path;
 }
 
+/**
+ * Rejects constructing a `ContextProvider` or `ContextConsumer` by hand
+ * inside a Lit component.
+ */
 export const preferContextDecorators: Deno.lint.Rule = {
   create(ctx) {
     /** Local names bound to an imperative context class by an import. */

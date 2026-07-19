@@ -32,6 +32,10 @@ function calleeBareName(callee: Deno.lint.Expression): string | null {
   return null;
 }
 
+/**
+ * Rejects `setTimeout`, `setInterval`, `requestAnimationFrame`, and
+ * `queueMicrotask` inside a Lit component.
+ */
 export const noTimers: Deno.lint.Rule = {
   create(ctx) {
     return {

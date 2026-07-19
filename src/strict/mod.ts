@@ -1,5 +1,7 @@
 /**
  * `lit-strict` — demanding but correct. Strongly recommended, not required.
+ *
+ * @module
  */
 
 import { attributeNames } from "./attribute-names.ts";
@@ -43,6 +45,9 @@ export const strictRules: Record<string, Deno.lint.Rule> = {
   "tag-matches-class-name": tagMatchesClassName,
 };
 
+/**
+ * The `lit-strict` plugin: every rule in this module, ready for `deno.json`.
+ */
 const plugin: Deno.lint.Plugin = {
   name: "lit-strict",
   rules: strictRules,

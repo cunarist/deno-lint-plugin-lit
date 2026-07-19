@@ -20,6 +20,10 @@ function packageOf(source: string): string {
   return source.split("/")[0] ?? source;
 }
 
+/**
+ * Rejects imports from the Lit 1 module paths `lit-html` and `lit-element`,
+ * and imports of names that Lit 2 removed.
+ */
 export const noLegacyImports: Deno.lint.Rule = {
   create(ctx) {
     return {

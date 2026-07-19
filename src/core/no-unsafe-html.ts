@@ -26,6 +26,10 @@ const UNSAFE_SOURCES: readonly string[] = [
 const HINT =
   "Bind the value normally so Lit escapes it, or build the markup as a nested `html` template.";
 
+/**
+ * Bans the `unsafeHTML` and `unsafeSVG` directives — both the import
+ * specifier and every call site.
+ */
 export const noUnsafeHtml: Deno.lint.Rule = {
   create(ctx) {
     /** Local binding name -> the directive it was imported as. */

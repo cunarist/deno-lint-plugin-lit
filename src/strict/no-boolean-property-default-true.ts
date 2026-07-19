@@ -106,6 +106,9 @@ function fieldsByName(node: ClassNode): Map<string, FieldNode> {
   return fields;
 }
 
+/**
+ * Rejects a boolean reactive property initialised to `true`.
+ */
 export const noBooleanPropertyDefaultTrue: Deno.lint.Rule = {
   create(ctx) {
     function report(node: Deno.lint.Node, name: string): void {

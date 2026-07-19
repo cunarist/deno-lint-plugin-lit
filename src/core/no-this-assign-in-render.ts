@@ -26,6 +26,9 @@ function targetsThis(node: Deno.lint.Node): boolean {
   return current.type === "ThisExpression";
 }
 
+/**
+ * Rejects assigning to anything reached through `this` inside `render()`.
+ */
 export const noThisAssignInRender: Deno.lint.Rule = {
   create(ctx) {
     /** Report if `target` mutates `this` inside `render()`. */

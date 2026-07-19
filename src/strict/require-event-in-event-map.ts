@@ -32,6 +32,10 @@ function lastSegment(path: string | null): string | null {
   return path.split(".").pop() ?? path;
 }
 
+/**
+ * Rejects an event constructed inside a Lit component whose name has no
+ * matching `HTMLElementEventMap` entry in the same file.
+ */
 export const requireEventInEventMap: Deno.lint.Rule = {
   create(ctx) {
     /** Every event name declared on `HTMLElementEventMap` in this file. */

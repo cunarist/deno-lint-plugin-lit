@@ -66,6 +66,10 @@ function check(
   });
 }
 
+/**
+ * Rejects a `@customElement` tag whose segments, after any leading prefix,
+ * do not PascalCase to the class name.
+ */
 export const tagMatchesClassName: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -62,6 +62,9 @@ function thisPropertyName(node: Deno.lint.Node): string | null {
   return null;
 }
 
+/**
+ * Rejects assigning to a reactive property inside `update()`.
+ */
 export const noPropertyChangeUpdate: Deno.lint.Rule = {
   create(ctx) {
     /** Report if `target` is `this.<reactiveProperty>` inside `update()`. */

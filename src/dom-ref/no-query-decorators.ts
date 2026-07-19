@@ -59,6 +59,11 @@ function checkMember(
   }
 }
 
+/**
+ * Rejects `@query`, `@queryAll`, `@queryAsync`, `@queryAssignedElements`,
+ * and `@queryAssignedNodes`, and their imports from the Lit decorator
+ * modules.
+ */
 export const noQueryDecorators: Deno.lint.Rule = {
   create(ctx) {
     return {

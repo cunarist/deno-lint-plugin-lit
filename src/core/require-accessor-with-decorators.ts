@@ -16,6 +16,10 @@ import {
   keyName,
 } from "#helpers";
 
+/**
+ * Reports a `@property` or `@state` decorator on a plain class field instead
+ * of an `accessor` field.
+ */
 export const requireAccessorWithDecorators: Deno.lint.Rule = {
   create(ctx) {
     return {

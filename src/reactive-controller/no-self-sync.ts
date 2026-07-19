@@ -20,6 +20,9 @@ function isControllerClass(
   return !isLitComponent(node) && looksLikeReactiveController(node);
 }
 
+/**
+ * Rejects a controller calling its own `sync*` method through `this`.
+ */
 export const noSelfSync: Deno.lint.Rule = {
   create(ctx) {
     return {

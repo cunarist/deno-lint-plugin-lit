@@ -12,6 +12,10 @@ import { bindingPlaceholder, isHtmlTemplate, templateSource } from "#helpers";
 
 const LEGACY = /\[\[[^\][]+\]\]|\{\{[^{}]+\}\}/g;
 
+/**
+ * Rejects Polymer-style `[[oneWay]]` and `{{twoWay}}` bindings inside an
+ * `html` template.
+ */
 export const noLegacyTemplateSyntax: Deno.lint.Rule = {
   create(ctx) {
     return {

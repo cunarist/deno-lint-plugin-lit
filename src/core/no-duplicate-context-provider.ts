@@ -45,6 +45,10 @@ function memberDecorators(
   }
 }
 
+/**
+ * Rejects two `@provide` declarations for the same context object on one
+ * class.
+ */
 export const noDuplicateContextProvider: Deno.lint.Rule = {
   create(ctx) {
     function check(

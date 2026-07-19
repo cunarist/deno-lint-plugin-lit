@@ -24,6 +24,9 @@ const SYNC_LIFECYCLE: readonly string[] = [
   "disconnectedCallback",
 ];
 
+/**
+ * Rejects `async` on a Lit lifecycle hook.
+ */
 export const noAsyncLifecycle: Deno.lint.Rule = {
   create(ctx) {
     return {

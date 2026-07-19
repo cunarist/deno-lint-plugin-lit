@@ -17,6 +17,9 @@ function isFetchCallee(callee: Deno.lint.Expression): boolean {
     path === "window.fetch" || path === "self.fetch";
 }
 
+/**
+ * Rejects a `fetch(...)` call inside a Lit component class.
+ */
 export const noFetchInComponent: Deno.lint.Rule = {
   create(ctx) {
     return {

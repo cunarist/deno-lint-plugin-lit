@@ -158,6 +158,9 @@ function fieldKind(member: FieldNode): TypeKind | null {
   return kindFromInitializer(member.value);
 }
 
+/**
+ * Requires `{type: …}` on a `@property` whose value is not a string.
+ */
 export const requirePropertyType: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {

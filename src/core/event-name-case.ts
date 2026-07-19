@@ -26,6 +26,10 @@ function suggest(name: string): string {
     .toLowerCase();
 }
 
+/**
+ * Requires the name given to `new CustomEvent(...)` or `new Event(...)` to
+ * be all lowercase.
+ */
 export const eventNameCase: Deno.lint.Rule = {
   create(ctx) {
     return {

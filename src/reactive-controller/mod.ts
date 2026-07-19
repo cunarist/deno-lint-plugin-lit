@@ -1,6 +1,8 @@
 /**
  * `lit-reactive-controller` — the ReactiveController contract, and the
  * component lifecycle work that belongs in one.
+ *
+ * @module
  */
 
 import { constructionArgs } from "./construction-args.ts";
@@ -30,6 +32,10 @@ export const reactiveControllerRules: Record<string, Deno.lint.Rule> = {
   "self-registration": selfRegistration,
 };
 
+/**
+ * The `lit-reactive-controller` plugin: every rule in this module, ready for
+ * `deno.json`.
+ */
 const plugin: Deno.lint.Plugin = {
   name: "lit-reactive-controller",
   rules: reactiveControllerRules,

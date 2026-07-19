@@ -36,6 +36,10 @@ function findMember(
   return null;
 }
 
+/**
+ * Rejects a controller that defines `hostConnected` or `hostDisconnected`
+ * but not both.
+ */
 export const pairedLifecycle: Deno.lint.Rule = {
   create(ctx) {
     function check(

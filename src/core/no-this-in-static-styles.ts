@@ -38,6 +38,9 @@ function inStaticStylesInitializer(node: Deno.lint.Node): boolean {
   return false;
 }
 
+/**
+ * Rejects `this` inside a `static styles` initialiser.
+ */
 export const noThisInStaticStyles: Deno.lint.Rule = {
   create(ctx) {
     return {

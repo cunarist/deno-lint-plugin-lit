@@ -53,6 +53,10 @@ function isLowercase(name: string): boolean {
   return name === name.toLowerCase();
 }
 
+/**
+ * Rejects a camelCase reactive property that does not declare an explicit
+ * `attribute` option.
+ */
 export const attributeNames: Deno.lint.Rule = {
   create(ctx) {
     function report(node: Deno.lint.Node, name: string): void {

@@ -64,6 +64,9 @@ function isSelfClosing(element: ParsedElement, text: string): boolean {
   return true;
 }
 
+/**
+ * Rejects self-closing syntax on a non-void element in a template.
+ */
 export const noSelfClosingNonVoid: Deno.lint.Rule = {
   create(ctx) {
     return {

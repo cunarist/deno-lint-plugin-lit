@@ -39,6 +39,9 @@ function isDefineCall(node: Deno.lint.CallExpression): boolean {
     path.endsWith(".customElements.define");
 }
 
+/**
+ * Rejects registering the same custom element tag twice in one file.
+ */
 export const noDuplicateTagRegistration: Deno.lint.Rule = {
   create(ctx) {
     const registrations: Registration[] = [];

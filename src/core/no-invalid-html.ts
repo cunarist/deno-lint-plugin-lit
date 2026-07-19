@@ -99,6 +99,10 @@ function collectElements(
   return found;
 }
 
+/**
+ * Rejects markup inside an `html` template that does not parse as valid
+ * HTML.
+ */
 export const noInvalidHtml: Deno.lint.Rule = {
   create(ctx) {
     return {

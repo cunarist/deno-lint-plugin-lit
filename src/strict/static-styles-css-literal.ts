@@ -11,6 +11,10 @@ import { isCssTemplate, keyName } from "#helpers";
 const HINT =
   "Write the rules directly: `static styles = css`…``. No arrays, no references.";
 
+/**
+ * A `static styles` member must be a direct `css` tagged template — not an
+ * array, a reference, a call, or a getter.
+ */
 export const staticStylesCssLiteral: Deno.lint.Rule = {
   create(ctx) {
     return {

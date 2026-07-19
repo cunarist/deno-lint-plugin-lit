@@ -64,6 +64,10 @@ function entryTypeName(entry: EntryShape): string | null {
   return named.name;
 }
 
+/**
+ * Rejects a component registered with `@customElement` that has no matching
+ * `HTMLElementTagNameMap` entry in the same file.
+ */
 export const requireTagNameMap: Deno.lint.Rule = {
   create(ctx) {
     /** Tag -> mapped type name, for every `HTMLElementTagNameMap` entry. */

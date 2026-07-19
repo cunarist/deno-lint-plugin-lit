@@ -28,6 +28,9 @@ const SIGILS = ".@?";
 /** Owned by `no-jsx-attribute-names`, which gives a better message. */
 const JSX_NAMES: ReadonlySet<string> = new Set(["classname", "htmlfor"]);
 
+/**
+ * Rejects an attribute name containing uppercase letters.
+ */
 export const noCamelcaseAttribute: Deno.lint.Rule = {
   create(ctx) {
     return {

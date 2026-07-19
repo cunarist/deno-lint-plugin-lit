@@ -37,6 +37,10 @@ function superCallName(node: Deno.lint.CallExpression): string | null {
   return callee.property.type === "Identifier" ? callee.property.name : null;
 }
 
+/**
+ * Rejects an override of a Lit lifecycle callback that never calls its own
+ * `super` implementation.
+ */
 export const lifecycleSuper: Deno.lint.Rule = {
   create(ctx) {
     /** Methods seen calling their own `super` implementation. */

@@ -74,6 +74,9 @@ function thisPropertyName(node: Deno.lint.Node): string | null {
   return null;
 }
 
+/**
+ * Rejects calling a mutating array method on a reactive property.
+ */
 export const noArrayMutationWithoutReassign: Deno.lint.Rule = {
   create(ctx) {
     return {

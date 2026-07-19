@@ -16,6 +16,10 @@ function isControllerConstruction(node: Deno.lint.NewExpression): boolean {
   return (name.split(".").pop() ?? name).endsWith("Controller");
 }
 
+/**
+ * Rejects a host constructing a controller with anything other than exactly
+ * `this`.
+ */
 export const constructionArgs: Deno.lint.Rule = {
   create(ctx) {
     return {

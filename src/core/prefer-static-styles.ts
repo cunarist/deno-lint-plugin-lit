@@ -13,6 +13,9 @@ import {
   walkElements,
 } from "#helpers";
 
+/**
+ * Rejects a `<style>` element inside an `html` template.
+ */
 export const preferStaticStyles: Deno.lint.Rule = {
   create(ctx) {
     return {

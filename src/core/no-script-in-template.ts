@@ -16,6 +16,9 @@ import {
   walkElements,
 } from "#helpers";
 
+/**
+ * Rejects a `<script>` element inside a Lit template.
+ */
 export const noScriptInTemplate: Deno.lint.Rule = {
   create(ctx) {
     return {

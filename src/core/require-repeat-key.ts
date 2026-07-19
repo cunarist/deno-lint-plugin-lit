@@ -15,6 +15,10 @@
 
 import { memberPath } from "#helpers";
 
+/**
+ * Rejects `repeat(items, template)` — the two-argument form, with no key
+ * function.
+ */
 export const requireRepeatKey: Deno.lint.Rule = {
   create(ctx) {
     return {

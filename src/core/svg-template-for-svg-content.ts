@@ -65,6 +65,10 @@ const SVG_ONLY_ELEMENTS: ReadonlySet<string> = new Set([
   "view",
 ]);
 
+/**
+ * Rejects SVG-only elements written directly in an `html` template with no
+ * enclosing `<svg>`.
+ */
 export const svgTemplateForSvgContent: Deno.lint.Rule = {
   create(ctx) {
     return {

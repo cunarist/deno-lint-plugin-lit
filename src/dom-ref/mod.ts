@@ -1,5 +1,7 @@
 /**
  * `lit-dom-ref` — reach the DOM through a named `ref` callback, nothing else.
+ *
+ * @module
  */
 
 import { noCreateRef } from "./no-create-ref.ts";
@@ -13,6 +15,9 @@ export const domRefRules: Record<string, Deno.lint.Rule> = {
   "no-query-decorators": noQueryDecorators,
 };
 
+/**
+ * The `lit-dom-ref` plugin: every rule in this module, ready for `deno.json`.
+ */
 const plugin: Deno.lint.Plugin = {
   name: "lit-dom-ref",
   rules: domRefRules,

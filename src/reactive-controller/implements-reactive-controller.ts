@@ -19,6 +19,10 @@ function isControllerClass(
   return !isLitComponent(node) && looksLikeReactiveController(node);
 }
 
+/**
+ * Rejects a class that behaves like a reactive controller but does not
+ * declare `implements ReactiveController`.
+ */
 export const implementsReactiveController: Deno.lint.Rule = {
   create(ctx) {
     function check(

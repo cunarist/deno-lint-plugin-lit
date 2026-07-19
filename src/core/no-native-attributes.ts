@@ -42,6 +42,9 @@ function isNative(name: string): boolean {
   return NATIVE_ATTRIBUTES.includes(name.toLowerCase());
 }
 
+/**
+ * Rejects a reactive property named after a global HTML attribute.
+ */
 export const noNativeAttributes: Deno.lint.Rule = {
   create(ctx) {
     /** Report a collision on the node that names the property. */

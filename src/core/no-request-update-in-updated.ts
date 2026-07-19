@@ -29,6 +29,10 @@ function enclosingPostUpdateHook(node: Deno.lint.Node): string | null {
   return null;
 }
 
+/**
+ * Rejects calling `this.requestUpdate()` inside `updated()` or
+ * `firstUpdated()`.
+ */
 export const noRequestUpdateInUpdated: Deno.lint.Rule = {
   create(ctx) {
     return {

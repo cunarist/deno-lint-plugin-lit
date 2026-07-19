@@ -70,6 +70,10 @@ function referencesController(node: Deno.lint.Node): boolean {
   return isForeignControllerName(capitalized, null);
 }
 
+/**
+ * Rejects a controller that names, constructs, accepts, or forwards another
+ * reactive controller.
+ */
 export const noControllerReferences: Deno.lint.Rule = {
   create(ctx) {
     /** The controller class enclosing a node, or null. */

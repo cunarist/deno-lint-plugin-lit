@@ -11,6 +11,10 @@ const OPEN_TAG_BINDING = /<\s*\{\{__lit_(\d+)__\}\}/;
 const CLOSE_TAG_BINDING = /<\/\s*\{\{__lit_(\d+)__\}\}/;
 const ATTRIBUTE_NAME_BINDING = /<[a-zA-Z][^>]*?\s\{\{__lit_(\d+)__\}\}\s*=/;
 
+/**
+ * Rejects a `${…}` binding used as a tag name, in a closing tag, or as an
+ * attribute name.
+ */
 export const bindingPositions: Deno.lint.Rule = {
   create(ctx) {
     return {

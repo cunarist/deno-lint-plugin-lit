@@ -36,6 +36,9 @@ function inDocumentOrder(elements: readonly ParsedElement[]): ParsedElement[] {
   );
 }
 
+/**
+ * Rejects two `<slot>` elements with the same `name` in one template.
+ */
 export const noDuplicateSlotNames: Deno.lint.Rule = {
   create(ctx) {
     return {

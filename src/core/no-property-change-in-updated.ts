@@ -73,6 +73,10 @@ function enclosingPostUpdateHook(node: Deno.lint.Node): string | null {
   return null;
 }
 
+/**
+ * Rejects assigning to a reactive property inside `updated()` or
+ * `firstUpdated()`.
+ */
 export const noPropertyChangeInUpdated: Deno.lint.Rule = {
   create(ctx) {
     /** Report if `target` is `this.<reactiveProperty>` in a post-update hook. */

@@ -23,6 +23,9 @@ const JSX_NAMES: ReadonlyMap<string, string> = new Map([
   ["htmlfor", "for"],
 ]);
 
+/**
+ * Rejects the JSX attribute names `className` and `htmlFor` in a template.
+ */
 export const noJsxAttributeNames: Deno.lint.Rule = {
   create(ctx) {
     return {

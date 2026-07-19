@@ -32,6 +32,10 @@ const FORM_CONTROLS: ReadonlySet<string> = new Set([
   "textarea",
 ]);
 
+/**
+ * Rejects a bound `value=${…}` attribute on a form control; use the property
+ * binding `.value=${…}`.
+ */
 export const noValueAttribute: Deno.lint.Rule = {
   create(ctx) {
     return {

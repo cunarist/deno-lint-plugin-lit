@@ -42,6 +42,10 @@ function describe(name: string): string {
   }
 }
 
+/**
+ * Rejects the same attribute, property, boolean or event binding appearing
+ * twice on one element.
+ */
 export const noDuplicateTemplateBindings: Deno.lint.Rule = {
   create(ctx) {
     return {

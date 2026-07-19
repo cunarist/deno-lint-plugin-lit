@@ -7,6 +7,9 @@
 
 import { enclosingClass, isLitComponent, keyName } from "#helpers";
 
+/**
+ * Rejects an `async render()` on a Lit component.
+ */
 export const noAsyncRender: Deno.lint.Rule = {
   create(ctx) {
     return {

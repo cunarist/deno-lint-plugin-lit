@@ -7,6 +7,10 @@
 
 import { isHtmlTemplate } from "#helpers";
 
+/**
+ * Rejects an `html` template whose entire content is one binding and no
+ * markup.
+ */
 export const noUselessTemplateLiterals: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -110,6 +110,10 @@ const HANDLER_ATTRIBUTES: ReadonlySet<string> = new Set([
   "onwheel",
 ]);
 
+/**
+ * Rejects HTML inline event handler attributes such as `onclick` inside an
+ * `html` template.
+ */
 export const noInlineEventAttribute: Deno.lint.Rule = {
   create(ctx) {
     return {

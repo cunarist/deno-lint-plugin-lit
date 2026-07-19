@@ -24,6 +24,10 @@ function isPrivateName(name: string): boolean {
   return name.startsWith("#") || name.startsWith("_");
 }
 
+/**
+ * Rejects `@property` on a field whose name reads as private — `#count` or
+ * `_count`.
+ */
 export const noPrivateProperties: Deno.lint.Rule = {
   create(ctx) {
     function report(node: Deno.lint.Node, name: string): void {

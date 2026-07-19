@@ -57,6 +57,10 @@ function paramRange(param: Deno.lint.Parameter): Deno.lint.Range {
 
 const HINT = "Write `constructor(host: ReactiveControllerHost)`.";
 
+/**
+ * Rejects a controller constructor that is not exactly `constructor(host:
+ * ReactiveControllerHost)`.
+ */
 export const hostConstructor: Deno.lint.Rule = {
   create(ctx) {
     function check(

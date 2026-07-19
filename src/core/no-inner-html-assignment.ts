@@ -28,6 +28,9 @@ function sinkName(target: Deno.lint.MemberExpression): string | null {
   return MARKUP_SINKS.has(property.name) ? property.name : null;
 }
 
+/**
+ * Rejects assignment to `innerHTML` or `outerHTML` on any receiver.
+ */
 export const noInnerHtmlAssignment: Deno.lint.Rule = {
   create(ctx) {
     return {

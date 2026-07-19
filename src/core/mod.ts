@@ -1,5 +1,8 @@
 /**
- * `lit-core` — rules for code that does not do what it looks like it does.
+ * `lit-core` — rules for Lit code that does not do what it looks like it
+ * does.
+ *
+ * @module
  */
 
 import { attributeValueEntities } from "./attribute-value-entities.ts";
@@ -119,6 +122,9 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "value-after-constraints": valueAfterConstraints,
 };
 
+/**
+ * The `lit-core` plugin: every rule in this module, ready for `deno.json`.
+ */
 const plugin: Deno.lint.Plugin = {
   name: "lit-core",
   rules: coreRules,

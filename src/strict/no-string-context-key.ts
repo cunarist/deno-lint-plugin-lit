@@ -16,6 +16,9 @@ function isCreateContextCall(node: Deno.lint.CallExpression): boolean {
   return (path.split(".").pop() ?? path) === "createContext";
 }
 
+/**
+ * Rejects a string literal as the key passed to `createContext()`.
+ */
 export const noStringContextKey: Deno.lint.Rule = {
   create(ctx) {
     return {

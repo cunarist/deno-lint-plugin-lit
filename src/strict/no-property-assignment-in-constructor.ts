@@ -107,6 +107,9 @@ function thisPropertyName(node: Deno.lint.Expression): string | null {
   return null;
 }
 
+/**
+ * Rejects assigning a reactive property inside `constructor()`.
+ */
 export const noPropertyAssignmentInConstructor: Deno.lint.Rule = {
   create(ctx) {
     return {

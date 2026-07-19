@@ -18,6 +18,9 @@ function isCreateRef(callee: Deno.lint.Expression): boolean {
   return false;
 }
 
+/**
+ * Rejects `createRef`, both the import and any call to it.
+ */
 export const noCreateRef: Deno.lint.Rule = {
   create(ctx) {
     return {

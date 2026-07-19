@@ -49,6 +49,13 @@ function isStreamMethod(name: string): boolean {
   return name.startsWith("stream") && name.length > "stream".length;
 }
 
+/**
+ * Rejects constructing `AbortController`, `EventSource`,
+ * `IntersectionObserver`, `MutationObserver`, `ResizeObserver`, `WebSocket`,
+ * or `Worker` inside a Lit component, and rejects calling
+ * `addEventListener`, `removeEventListener`, `destroy`, `disconnect`,
+ * `dispose`, or any `stream*` method there.
+ */
 export const noComponentDisposables: Deno.lint.Rule = {
   create(ctx) {
     return {

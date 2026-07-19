@@ -16,6 +16,10 @@ import {
 } from "#helpers";
 import type { ParsedElement } from "#helpers";
 
+/**
+ * Rejects the same name bound as both an attribute and a property on one
+ * element.
+ */
 export const noAttributePropertyBindingConflict: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -70,6 +70,9 @@ function violation(
   return { node: reflect, type: converter.name };
 }
 
+/**
+ * Rejects `reflect: true` combined with `{type: Object}` or `{type: Array}`.
+ */
 export const noReflectOnComplexProperty: Deno.lint.Rule = {
   create(ctx) {
     function report(

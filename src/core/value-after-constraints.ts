@@ -36,6 +36,10 @@ const CONSTRAINTS: readonly string[] = [
 /** The two spellings of a value binding. */
 const VALUE_NAMES: readonly string[] = ["value", ".value"];
 
+/**
+ * Rejects a `value` binding that appears before a validity constraint
+ * attribute on the same form control.
+ */
 export const valueAfterConstraints: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -36,6 +36,9 @@ function inDocumentOrder(elements: readonly ParsedElement[]): ParsedElement[] {
   );
 }
 
+/**
+ * Rejects two or more unnamed `<slot>` elements in one template.
+ */
 export const noMultipleDefaultSlots: Deno.lint.Rule = {
   create(ctx) {
     return {

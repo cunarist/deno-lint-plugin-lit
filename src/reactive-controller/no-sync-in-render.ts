@@ -69,6 +69,10 @@ function controllerFields(
   return fields;
 }
 
+/**
+ * Rejects a host component calling `this.#someController.sync*()` from
+ * `render()`.
+ */
 export const noSyncInRender: Deno.lint.Rule = {
   create(ctx) {
     return {

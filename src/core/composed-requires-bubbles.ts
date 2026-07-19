@@ -53,6 +53,10 @@ function isLiteralTrue(node: Deno.lint.Property["value"] | null): boolean {
   return node !== null && node.type === "Literal" && node.value === true;
 }
 
+/**
+ * Requires `bubbles: true` whenever an event is constructed with `composed:
+ * true`.
+ */
 export const composedRequiresBubbles: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -45,6 +45,10 @@ function check(
   }
 }
 
+/**
+ * Rejects any lifecycle override on a Lit component other than `styles` and
+ * `render`.
+ */
 export const lifecycleAllowlist: Deno.lint.Rule = {
   create(ctx) {
     return {

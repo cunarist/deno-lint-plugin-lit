@@ -47,6 +47,10 @@ function isSelfRegistration(node: Deno.lint.CallExpression): boolean {
   return node.arguments.length === 1 && first?.type === "ThisExpression";
 }
 
+/**
+ * Rejects a controller that does not call `host.addController(this)` in its
+ * constructor.
+ */
 export const selfRegistration: Deno.lint.Rule = {
   create(ctx) {
     const registered = new Set<Deno.lint.Node>();

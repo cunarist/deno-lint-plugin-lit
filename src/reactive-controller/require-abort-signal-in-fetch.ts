@@ -42,6 +42,10 @@ function carriesSignal(argument: Deno.lint.Node | undefined): boolean {
   return false;
 }
 
+/**
+ * Rejects a `fetch(...)` inside a reactive controller that passes no
+ * `signal` option.
+ */
 export const requireAbortSignalInFetch: Deno.lint.Rule = {
   create(ctx) {
     return {

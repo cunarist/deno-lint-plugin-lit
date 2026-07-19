@@ -40,6 +40,10 @@ function check(
   }
 }
 
+/**
+ * Rejects `createRenderRoot()` returning `this`, which renders the component
+ * into the light DOM.
+ */
 export const noLightDom: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -9,6 +9,10 @@ import { LIT_CORE_SOURCES } from "#helpers";
 
 const BANNED = "unsafeCSS";
 
+/**
+ * Bans `unsafeCSS` imported from Lit — both the import specifier and every
+ * call site.
+ */
 export const noUnsafeCss: Deno.lint.Rule = {
   create(ctx) {
     const locals = new Set<string>();

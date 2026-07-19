@@ -25,6 +25,10 @@ function isCreateContextCall(node: Deno.lint.CallExpression): boolean {
   return (path.split(".").pop() ?? path) === "createContext";
 }
 
+/**
+ * Requires `createContext()` from `@lit/context` to be given an explicit
+ * type argument.
+ */
 export const requireContextType: Deno.lint.Rule = {
   create(ctx) {
     return {

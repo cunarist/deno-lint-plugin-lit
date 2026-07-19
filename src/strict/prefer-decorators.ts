@@ -32,6 +32,9 @@ function check(
   }
 }
 
+/**
+ * Rejects a `static properties` declaration on a Lit component.
+ */
 export const preferDecorators: Deno.lint.Rule = {
   create(ctx) {
     return {

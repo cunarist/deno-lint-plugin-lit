@@ -21,6 +21,9 @@ import type { ParsedElement } from "#helpers";
 /** Sigils that mark a binding Lit resolves itself rather than as an attribute. */
 const SIGILS = ".@?";
 
+/**
+ * Rejects a template bound into attribute position.
+ */
 export const noTemplateResultInAttribute: Deno.lint.Rule = {
   create(ctx) {
     return {

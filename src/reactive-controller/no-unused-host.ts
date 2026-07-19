@@ -44,6 +44,10 @@ function isAssignmentTarget(node: Deno.lint.MemberExpression): boolean {
     parent.left.range[1] === node.range[1];
 }
 
+/**
+ * Rejects a controller that stores `host` or `#host` as a field but never
+ * reads it.
+ */
 export const noUnusedHost: Deno.lint.Rule = {
   create(ctx) {
     const stores = new Map<number, HostStore>();

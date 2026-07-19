@@ -22,6 +22,10 @@ const SCHEDULING_METHODS: readonly string[] = [
 /** Receivers a controller may legitimately schedule an update on. */
 const ALLOWED_RECEIVERS: readonly string[] = ["this.host", "this.#host"];
 
+/**
+ * Rejects `requestUpdate`, `performUpdate`, and `scheduleUpdate` unless
+ * called on `this.host` or `this.#host`.
+ */
 export const noManualUpdate: Deno.lint.Rule = {
   create(ctx) {
     return {

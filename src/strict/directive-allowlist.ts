@@ -18,6 +18,10 @@ const ALLOWED_DIRECTIVES: readonly string[] = [
 /** Matches any Lit directive module specifier. */
 const DIRECTIVE_SOURCE = /^(?:lit|lit-html|lit-element)\/directives\//;
 
+/**
+ * Rejects every import from a Lit `directives/` module except
+ * `lit/directives/ref.js` and `lit/directives/repeat.js`.
+ */
 export const directiveAllowlist: Deno.lint.Rule = {
   create(ctx) {
     return {

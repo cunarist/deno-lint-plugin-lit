@@ -11,6 +11,9 @@ import { enclosingClass, isLitComponent, memberPath } from "#helpers";
 /** Receivers that are the component itself. */
 const SELF_RECEIVERS: readonly string[] = ["this", "this.renderRoot"];
 
+/**
+ * Requires a component's events to be dispatched on the component itself.
+ */
 export const requireDispatchOnThis: Deno.lint.Rule = {
   create(ctx) {
     return {

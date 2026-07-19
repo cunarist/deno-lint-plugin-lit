@@ -34,6 +34,10 @@ function isLifecycleName(name: string): boolean {
   return LIT_LIFECYCLE_MEMBERS.includes(name);
 }
 
+/**
+ * Rejects a class field or reactive property named after a Lit lifecycle
+ * member.
+ */
 export const noPropertyNamedLikeLifecycle: Deno.lint.Rule = {
   create(ctx) {
     function report(node: Deno.lint.Node, name: string): void {

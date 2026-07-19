@@ -20,6 +20,9 @@ function isDispatchCallee(callee: Deno.lint.CallExpression["callee"]): boolean {
   return property.type === "Identifier" && property.name === "dispatchEvent";
 }
 
+/**
+ * Rejects calling `dispatchEvent(...)` from `render()`.
+ */
 export const noDispatchInRender: Deno.lint.Rule = {
   create(ctx) {
     return {

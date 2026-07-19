@@ -134,6 +134,9 @@ function isPlainInstanceField(
   return !isReactiveProperty(member);
 }
 
+/**
+ * Rejects a plain class field whose name matches a reactive property.
+ */
 export const noClassfieldShadowing: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {

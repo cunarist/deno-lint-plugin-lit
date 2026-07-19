@@ -199,6 +199,10 @@ function isRenderReturn(node: Deno.lint.ReturnStatement): boolean {
   return keyName(parent.key) === "render";
 }
 
+/**
+ * Every `${…}` binding in an `html` template must be an identifier, `this`,
+ * or a non-computed member chain — nothing else.
+ */
 export const simpleTemplateExpressions: Deno.lint.Rule = {
   create(ctx) {
     return {

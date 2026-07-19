@@ -76,6 +76,9 @@ function invalidEscapes(raw: string): Invalid[] {
   return found;
 }
 
+/**
+ * Rejects a malformed `\x` or `\u` escape inside an `html` template.
+ */
 export const noInvalidEscapeSequences: Deno.lint.Rule = {
   create(ctx) {
     return {

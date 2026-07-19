@@ -44,6 +44,10 @@ function decoratedNames(node: ClassNode): Set<string> {
   return names;
 }
 
+/**
+ * Rejects a property declared by both a decorator and a `static properties`
+ * entry.
+ */
 export const noDuplicatePropertyDeclaration: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {

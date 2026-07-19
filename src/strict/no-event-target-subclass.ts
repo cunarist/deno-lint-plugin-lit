@@ -22,6 +22,9 @@ function check(
   });
 }
 
+/**
+ * Rejects a class that extends `EventTarget`.
+ */
 export const noEventTargetSubclass: Deno.lint.Rule = {
   create(ctx) {
     return {

@@ -52,6 +52,9 @@ function consumedPaths(
   return paths;
 }
 
+/**
+ * Rejects assignment to a field declared with `@consume`.
+ */
 export const noContextMutationByConsumer: Deno.lint.Rule = {
   create(ctx) {
     function check(

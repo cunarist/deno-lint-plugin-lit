@@ -74,6 +74,10 @@ function describe(sigil: string): string {
   return "A property binding";
 }
 
+/**
+ * Rejects a property, event or boolean binding that is not the entire
+ * attribute value.
+ */
 export const noPartialPropertyBinding: Deno.lint.Rule = {
   create(ctx) {
     return {

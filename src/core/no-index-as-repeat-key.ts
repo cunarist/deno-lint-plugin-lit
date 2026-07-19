@@ -36,6 +36,9 @@ function returnedExpression(fn: KeyFunction): Deno.lint.Expression | null {
   return only.argument ?? null;
 }
 
+/**
+ * Rejects a `repeat` key function that returns its own index parameter.
+ */
 export const noIndexAsRepeatKey: Deno.lint.Rule = {
   create(ctx) {
     return {

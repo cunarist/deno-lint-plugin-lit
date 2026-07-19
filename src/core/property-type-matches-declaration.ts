@@ -188,6 +188,9 @@ function fieldsByName(node: ClassNode): Map<string, FieldNode> {
   return fields;
 }
 
+/**
+ * Rejects a `{type: …}` option that contradicts the field's declared type.
+ */
 export const propertyTypeMatchesDeclaration: Deno.lint.Rule = {
   create(ctx) {
     function report(

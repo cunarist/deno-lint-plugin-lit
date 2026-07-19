@@ -67,6 +67,10 @@ function attributeValue(
   return { start: start + valueStart, end: start + valueEnd };
 }
 
+/**
+ * Rejects an unescaped `&`, `<`, `>` or `"` inside a static attribute value
+ * in an `html` template.
+ */
 export const attributeValueEntities: Deno.lint.Rule = {
   create(ctx) {
     return {

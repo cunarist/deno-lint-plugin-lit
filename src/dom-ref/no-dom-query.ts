@@ -16,6 +16,9 @@ function inLitComponent(node: Deno.lint.Node): boolean {
   return owner !== null && isLitComponent(owner);
 }
 
+/**
+ * Rejects `querySelector` and `querySelectorAll` inside a Lit component.
+ */
 export const noDomQuery: Deno.lint.Rule = {
   create(ctx) {
     return {
