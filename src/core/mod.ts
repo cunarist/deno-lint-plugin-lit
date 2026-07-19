@@ -51,7 +51,6 @@ import { noUnsafeHtml } from "./no-unsafe-html.ts";
 import { noUselessTemplateLiterals } from "./no-useless-template-literals.ts";
 import { noValueAttribute } from "./no-value-attribute.ts";
 import { preferStaticStyles } from "./prefer-static-styles.ts";
-import { propertyTypeMatchesDeclaration } from "./property-type-matches-declaration.ts";
 import { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 import { requireContextType } from "./require-context-type.ts";
 import { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
@@ -109,7 +108,6 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "no-useless-template-literals": noUselessTemplateLiterals,
   "no-value-attribute": noValueAttribute,
   "prefer-static-styles": preferStaticStyles,
-  "property-type-matches-declaration": propertyTypeMatchesDeclaration,
   "require-accessor-with-decorators": requireAccessorWithDecorators,
   "require-context-type": requireContextType,
   "require-dispatch-on-this": requireDispatchOnThis,
@@ -175,7 +173,6 @@ export { noUnsafeHtml } from "./no-unsafe-html.ts";
 export { noUselessTemplateLiterals } from "./no-useless-template-literals.ts";
 export { noValueAttribute } from "./no-value-attribute.ts";
 export { preferStaticStyles } from "./prefer-static-styles.ts";
-export { propertyTypeMatchesDeclaration } from "./property-type-matches-declaration.ts";
 export { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 export { requireContextType } from "./require-context-type.ts";
 export { requireDispatchOnThis } from "./require-dispatch-on-this.ts";

@@ -1,15 +1,21 @@
 # require-property-type
 
-Requires `{type: …}` on a `@property` whose value is not a string.
+Requires `{type: …}` on every `@property` that has an attribute.
 
 ## Why
 
-Lit's default attribute converter is the identity function: whatever the
-attribute says arrives as a `string`. So `@property() count = 0` holds the
-string `"3"` the moment anyone writes a `count="3"` attribute, and arithmetic on
-it starts concatenating. Booleans are worse — the attribute value `"false"` is a
-truthy string, so the property is `true` however the markup is written. Naming
-the type installs the matching converter and the value arrives parsed.
+An attribute is always a string — HTML has no other type. `type` is what tells
+Lit to read it as something else. Leave it out and Lit installs the identity
+converter, so `<my-el count="3">` leaves `count` holding `"3"` and
+`this.count + 1` is `"31"`. TypeScript cannot see this: the field is declared
+`number` and the wrong value arrives at runtime.
+
+The check is syntactic — it asks whether `type` is written, not what the
+property's declared type is. An earlier version inferred the type from the
+initialiser, which meant it passed `accessor count: number;` and
+`accessor total: Count;` — the cases where the mistake is easiest to make and
+hardest to spot. A rule that is right about a narrow slice and silent elsewhere
+is worse than one that always asks.
 
 ## Examples
 
@@ -17,28 +23,24 @@ the type installs the matching converter and the value arrives parsed.
 // BAD
 class El extends LitElement {
   @property()
-  count = 0;
-
-  @property()
-  items: string[] = [];
+  accessor count = 0;
 }
 
 // GOOD
 class El extends LitElement {
   @property({ type: Number })
   accessor count = 0;
-
-  @property({ type: Array })
-  accessor items: string[] = [];
 }
 ```
 
 ## Notes
 
-- The property's shape is read from its type annotation first, then from its
-  initialiser. A property with neither — or with a shape that needs type
-  resolution, such as `: Foo` or a union — is left alone rather than guessed at.
-- `converter:` and `attribute: false` both satisfy the rule: the first replaces
-  the conversion, the second means the value never comes from markup at all. A
-  spread in the options object is assumed to carry one of them.
-- `@state` is never checked. State has no attribute, so no conversion happens.
+- `{ type: String }` is required on string properties too. It is redundant to
+  Lit — String is the default — but writing it is what makes the rule exhaustive
+  rather than a guess.
+- Exempt, because no conversion can run: `attribute: false`, `@state`, and a
+  custom `converter`, which replaces whatever `type` would have selected.
+- A spread in the options object is assumed to carry `type`, so it is left alone
+  rather than guessed at.
+- This rule does not check that the declared `type` is _correct_. That would
+  need real type resolution, which a lint plugin does not have.

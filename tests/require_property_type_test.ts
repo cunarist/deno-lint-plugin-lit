@@ -9,116 +9,83 @@ import {
 
 const plugin = rulePlugin("require-property-type", requirePropertyType);
 
-Deno.test("require-property-type: allows a string property with no type", () => {
-  assertValid(
+Deno.test("require-property-type: requires type when there is an attribute", () => {
+  assertInvalid(
     plugin,
-    `class El extends LitElement {
-      @property() label = "";
-      @property() title: string = "x";
-    }`,
+    'class El extends LitElement { @property() accessor name = ""; }',
+  );
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property() accessor count = 0; }",
+  );
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property({ reflect: true }) accessor open = false; }",
   );
 });
 
-Deno.test("require-property-type: allows a declared type", () => {
-  assertValid(
+Deno.test("require-property-type: catches what inference used to miss", () => {
+  // A declared type the rule cannot resolve is exactly where the mistake is
+  // easiest to make, so it must still be reported.
+  assertInvalid(
     plugin,
-    `class El extends LitElement {
-      @property({type: Number}) count = 0;
-      @property({type: Boolean}) open = false;
-      @property({type: Array}) items: string[] = [];
-    }`,
+    "class El extends LitElement { @property() accessor count: number; }",
+  );
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property() accessor total: Count; }",
+  );
+  assertInvalid(
+    plugin,
+    "class El extends LitElement { @property() accessor cfg = makeConfig(); }",
   );
 });
 
-Deno.test("require-property-type: allows attribute: false and a custom converter", () => {
+Deno.test("require-property-type: accepts a declared type", () => {
   assertValid(
     plugin,
-    `class El extends LitElement {
-      @property({attribute: false}) data: object = {};
-      @property({converter: myConverter}) count = 0;
-    }`,
+    "class El extends LitElement { @property({ type: Number }) accessor count = 0; }",
+  );
+  assertValid(
+    plugin,
+    'class El extends LitElement { @property({ type: String }) accessor name = ""; }',
   );
 });
 
-Deno.test("require-property-type: ignores @state", () => {
+Deno.test("require-property-type: accepts a custom converter", () => {
+  // A converter replaces whatever `type` would have selected.
   assertValid(
     plugin,
-    `class El extends LitElement {
-      @state() count = 0;
-    }`,
+    "class El extends LitElement { @property({ converter: dateConverter }) accessor at; }",
   );
 });
 
-Deno.test("require-property-type: ignores undecidable shapes", () => {
+Deno.test("require-property-type: exempts properties with no attribute", () => {
   assertValid(
     plugin,
-    `class El extends LitElement {
-      @property() value: Foo = makeFoo();
-      @property() other;
-    }`,
+    "class El extends LitElement { @property({ attribute: false }) accessor onEdit = () => {}; }",
+  );
+  assertValid(
+    plugin,
+    "class El extends LitElement { @state() accessor internal = 0; }",
+  );
+});
+
+Deno.test("require-property-type: leaves a spread alone", () => {
+  // The spread could carry `type`; guessing would invent a false positive.
+  assertValid(
+    plugin,
+    "class El extends LitElement { @property({ ...shared }) accessor x = 0; }",
   );
 });
 
 Deno.test("require-property-type: ignores non-Lit classes", () => {
-  assertValid(
-    plugin,
-    `class Plain {
-      @property() count = 0;
-    }`,
-  );
-});
-
-Deno.test("require-property-type: rejects an untyped number", () => {
-  assertInvalid(
-    plugin,
-    `class El extends LitElement {
-      @property() count = 0;
-    }`,
-  );
-});
-
-Deno.test("require-property-type: rejects an untyped boolean", () => {
-  assertInvalid(
-    plugin,
-    `class El extends LitElement {
-      @property() open: boolean = false;
-    }`,
-  );
-});
-
-Deno.test("require-property-type: rejects an untyped array and object", () => {
-  assertInvalid(
-    plugin,
-    `class El extends LitElement {
-      @property() items: string[] = [];
-      @property() data = {};
-    }`,
-    2,
-  );
-});
-
-Deno.test("require-property-type: rejects a negative number initialiser", () => {
-  assertInvalid(
-    plugin,
-    `class El extends LitElement {
-      @property() offset = -1;
-    }`,
-  );
-});
-
-Deno.test("require-property-type: rejects an untyped accessor property", () => {
-  assertInvalid(
-    plugin,
-    `class El extends LitElement {
-      @property() accessor count = 0;
-    }`,
-  );
+  assertValid(plugin, "class Plain { @property() accessor x = 0; }");
 });
 
 Deno.test("require-property-type: highlights the property name", () => {
-  const code = `class El extends LitElement {
-  @property() count = 0;
-}`;
+  const code =
+    "class El extends LitElement { @property() accessor count = 0; }";
   const [diagnostic] = assertInvalid(plugin, code);
   if (!diagnostic) throw new Error("expected a diagnostic");
   assertReportedText(code, diagnostic, "count");

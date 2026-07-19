@@ -22,7 +22,7 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  @property({ attribute: "my-prop" })
+  @property({ type: String, attribute: "my-prop" })
   accessor myProp = "";
 }
 ```

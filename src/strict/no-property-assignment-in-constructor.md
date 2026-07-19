@@ -29,7 +29,7 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  @property()
+  @property({ type: String })
   accessor label = "";
 }
 ```
