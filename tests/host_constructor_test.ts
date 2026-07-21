@@ -99,10 +99,10 @@ Deno.test("host-constructor: highlights the bad parameter", () => {
   assertReportedText(code, diagnostic, "owner: ReactiveControllerHost");
 });
 
-Deno.test("host-constructor: requires the host to be stored as #host", () => {
-  // Sibling rules read `this.#host`. Enforcing the name here is what lets them
-  // rely on it instead of quietly skipping controllers that use another.
-  assertInvalid(
+Deno.test("host-constructor: does not dictate the storage field", () => {
+  // The constructor signature is all this rule checks. Sibling rules detect
+  // whatever field the host lands in, so any name is allowed here.
+  assertValid(
     plugin,
     `class C implements ReactiveController {
       #element;

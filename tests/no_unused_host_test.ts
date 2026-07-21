@@ -67,6 +67,47 @@ Deno.test("no-unused-host: rejects a write-only public host", () => {
   );
 });
 
+Deno.test("no-unused-host: rejects a write-only host under any field name", () => {
+  assertInvalid(
+    plugin,
+    `class BarController implements ReactiveController {
+      _host: ReactiveControllerHost;
+      constructor(host: ReactiveControllerHost) {
+        this._host = host;
+        host.addController(this);
+      }
+    }`,
+  );
+});
+
+Deno.test("no-unused-host: allows a read under a renamed field", () => {
+  assertValid(
+    plugin,
+    `class BarController implements ReactiveController {
+      _host: ReactiveControllerHost;
+      constructor(host: ReactiveControllerHost) {
+        this._host = host;
+      }
+      hostConnected(): void {
+        this._host.requestUpdate();
+      }
+    }`,
+  );
+});
+
+Deno.test("no-unused-host: finds the host by type when the param is renamed", () => {
+  assertInvalid(
+    plugin,
+    `class BarController implements ReactiveController {
+      #host: ReactiveControllerHost;
+      constructor(controllerHost: ReactiveControllerHost) {
+        this.#host = controllerHost;
+        controllerHost.addController(this);
+      }
+    }`,
+  );
+});
+
 Deno.test("no-unused-host: counts a read anywhere in the class", () => {
   assertValid(
     plugin,

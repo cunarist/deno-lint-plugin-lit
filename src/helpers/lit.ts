@@ -1,6 +1,11 @@
 /** Lit-specific detection helpers. */
 
-import { classDecorators, memberPath } from "./ast.ts";
+import {
+  classDecorators,
+  findConstructor,
+  memberPath,
+  typeReferenceName,
+} from "./ast.ts";
 
 /** Module specifiers that count as "the Lit core" for import checks. */
 export const LIT_CORE_SOURCES: readonly string[] = [
@@ -83,6 +88,73 @@ export function isReactiveController(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): boolean {
   return hasReactiveControllerInterface(node);
+}
+
+/** The `ReactiveControllerHost` parameter in a constructor, by type not name. */
+function hostParamOf(
+  ctor: Deno.lint.MethodDefinition,
+): Deno.lint.Identifier | null {
+  for (const param of ctor.value.params) {
+    if (
+      param.type === "Identifier" &&
+      typeReferenceName(param.typeAnnotation) === "ReactiveControllerHost"
+    ) {
+      return param;
+    }
+  }
+  return null;
+}
+
+/**
+ * The constructor parameter a controller receives its host through.
+ *
+ * Found by its `ReactiveControllerHost` type, not by the name `host`, so this
+ * does not depend on `host-constructor` having enforced that name — a controller
+ * may call the parameter anything.
+ */
+export function controllerHostParam(
+  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+): Deno.lint.Identifier | null {
+  const ctor = findConstructor(node);
+  return ctor ? hostParamOf(ctor) : null;
+}
+
+/**
+ * The field a controller stores its host in, by name (`#host`, `host`, `_host`,
+ * …), or null.
+ *
+ * The host parameter is found by type, then followed to a top-level
+ * `this.<field> = host` assignment in the constructor. Anything more elaborate —
+ * an intermediate alias (`const h = host; this.#host = h`), destructuring, or a
+ * nested target (`this.state.host`) — is unanalyzable and returns null; callers
+ * skip the controller rather than guess. Returns null too when the host is not
+ * stored at all, which is legitimate: a controller that only registers itself
+ * needs no field.
+ */
+export function controllerHostField(
+  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+): string | null {
+  const ctor = findConstructor(node);
+  if (!ctor) return null;
+  const param = hostParamOf(ctor);
+  if (!param) return null;
+  const body = ctor.value.body;
+  if (!body) return null;
+  for (const statement of body.body) {
+    if (statement.type !== "ExpressionStatement") continue;
+    const expr = statement.expression;
+    if (expr.type !== "AssignmentExpression" || expr.operator !== "=") continue;
+    if (expr.right.type !== "Identifier" || expr.right.name !== param.name) {
+      continue;
+    }
+    const target = expr.left;
+    if (target.type !== "MemberExpression" || target.computed) continue;
+    if (target.object.type !== "ThisExpression") continue;
+    const property = target.property;
+    if (property.type === "Identifier") return property.name;
+    if (property.type === "PrivateIdentifier") return `#${property.name}`;
+  }
+  return null;
 }
 
 /** Whether a tagged template uses the given tag name (`html` or `css`). */

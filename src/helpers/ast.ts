@@ -186,6 +186,34 @@ export function findProperty(
   return null;
 }
 
+/** The constructor of a class, if it defines one. */
+export function findConstructor(
+  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+): Deno.lint.MethodDefinition | null {
+  for (const member of classMembers(node)) {
+    if (member.type === "MethodDefinition" && member.kind === "constructor") {
+      return member;
+    }
+  }
+  return null;
+}
+
+/** Name of the type in a `: SomeType` annotation, if it is a plain reference. */
+export function typeReferenceName(
+  annotation: Deno.lint.TSTypeAnnotation | undefined | null,
+): string | null {
+  const inner = annotation?.typeAnnotation;
+  if (!inner || inner.type !== "TSTypeReference") return null;
+  const name = inner.typeName as unknown as {
+    readonly type: string;
+    readonly name?: string;
+    readonly right?: { readonly name?: string };
+  };
+  if (name.type === "Identifier") return name.name ?? null;
+  if (name.type === "TSQualifiedName") return name.right?.name ?? null;
+  return null;
+}
+
 /** Convert `PathBar` to `path-bar`. */
 export function pascalToKebab(name: string): string {
   return name

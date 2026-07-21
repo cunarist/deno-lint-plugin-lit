@@ -2,11 +2,12 @@
  * `no-unused-host`
  *
  * Keeping a reference to the host implies the controller pushes updates to it.
- * A stored `#host` that is never read is dead weight that suggests a
- * relationship which does not exist — register with the host and let it go.
+ * A stored host that is never read is dead weight that suggests a relationship
+ * which does not exist — register with the host and let it go.
  */
 
 import {
+  controllerHostField,
   enclosingClass,
   isLitComponent,
   isReactiveController,
@@ -28,13 +29,6 @@ function isControllerClass(
   return !isLitComponent(node) && isReactiveController(node);
 }
 
-/** Whether a member expression reads `this.host` or `this.#host`. */
-function hostMemberName(node: Deno.lint.MemberExpression): string | null {
-  if (node.computed || node.object.type !== "ThisExpression") return null;
-  const name = memberPath(node.property);
-  return name === "host" || name === "#host" ? name : null;
-}
-
 /** Whether a node is the assignment target of `<node> = …`. */
 function isAssignmentTarget(node: Deno.lint.MemberExpression): boolean {
   const parent = (node as { parent?: Deno.lint.Node }).parent;
@@ -45,8 +39,9 @@ function isAssignmentTarget(node: Deno.lint.MemberExpression): boolean {
 }
 
 /**
- * Rejects a controller that stores `host` or `#host` as a field but never
- * reads it.
+ * Rejects a controller that stores its host as a field but never reads it. The
+ * field is whatever name the constructor assigns the host to, not a fixed
+ * `#host` — see `controllerHostField`.
  */
 export const noUnusedHost: Deno.lint.Rule = {
   create(ctx) {
@@ -56,13 +51,14 @@ export const noUnusedHost: Deno.lint.Rule = {
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
       if (!isControllerClass(node)) return;
+      const field = controllerHostField(node);
+      if (field === null) return;
       for (const member of node.body.body) {
         if (member.type !== "PropertyDefinition" || member.static) continue;
-        const name = keyName(member.key);
-        if (name !== "host" && name !== "#host") continue;
+        if (keyName(member.key) !== field) continue;
         stores.set(node.range[0], {
           range: member.key.range,
-          name,
+          name: field,
           used: false,
         });
         return;
@@ -86,12 +82,14 @@ export const noUnusedHost: Deno.lint.Rule = {
       ClassDeclaration: enter,
       ClassExpression: enter,
       MemberExpression(node) {
-        if (hostMemberName(node) === null) return;
+        if (node.computed || node.object.type !== "ThisExpression") return;
         if (isAssignmentTarget(node)) return;
         const owner = enclosingClass(node);
         if (owner === null) return;
         const store = stores.get(owner.range[0]);
-        if (store) store.used = true;
+        if (store && memberPath(node.property) === store.name) {
+          store.used = true;
+        }
       },
       "ClassDeclaration:exit": exit,
       "ClassExpression:exit": exit,

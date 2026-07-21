@@ -7,15 +7,15 @@
  */
 
 import {
+  controllerHostField,
+  controllerHostParam,
   enclosingClass,
   enclosingMethod,
+  findConstructor,
   isLitComponent,
   isReactiveController,
   memberPath,
 } from "#helpers";
-
-/** Receivers a controller may legitimately register itself on. */
-const HOST_PATHS: readonly string[] = ["host", "this.host", "this.#host"];
 
 /** A class in scope for the controller rules. */
 function isControllerClass(
@@ -24,25 +24,34 @@ function isControllerClass(
   return !isLitComponent(node) && isReactiveController(node);
 }
 
-/** The constructor of a class, if it defines one. */
-function findConstructor(
-  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
-): Deno.lint.MethodDefinition | null {
-  for (const member of node.body.body) {
-    if (member.type === "MethodDefinition" && member.kind === "constructor") {
-      return member;
-    }
-  }
-  return null;
+/**
+ * Spellings that name the host inside a controller: the parameter itself, and
+ * whatever field the constructor stores it in. The parameter and field are
+ * found by type, so registering through a renamed host still counts.
+ */
+function hostReceivers(
+  owner: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+): string[] {
+  const receivers = ["host", "this.host", "this.#host"];
+  const param = controllerHostParam(owner);
+  if (param) receivers.push(param.name);
+  const field = controllerHostField(owner);
+  if (field) receivers.push(`this.${field}`);
+  return receivers;
 }
 
 /** Whether a call is `host.addController(this)` in any accepted spelling. */
-function isSelfRegistration(node: Deno.lint.CallExpression): boolean {
+function isSelfRegistration(
+  node: Deno.lint.CallExpression,
+  owner: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+): boolean {
   const callee = node.callee;
   if (callee.type !== "MemberExpression" || callee.computed) return false;
   if (memberPath(callee.property) !== "addController") return false;
   const receiver = memberPath(callee.object);
-  if (receiver === null || !HOST_PATHS.includes(receiver)) return false;
+  if (receiver === null || !hostReceivers(owner).includes(receiver)) {
+    return false;
+  }
   const first = node.arguments[0];
   return node.arguments.length === 1 && first?.type === "ThisExpression";
 }
@@ -70,11 +79,12 @@ export const selfRegistration: Deno.lint.Rule = {
 
     return {
       CallExpression(node) {
-        if (!isSelfRegistration(node)) return;
+        const owner = enclosingClass(node);
+        if (owner === null) return;
+        if (!isSelfRegistration(node, owner)) return;
         const method = enclosingMethod(node);
         if (method === null || method.kind !== "constructor") return;
-        const owner = enclosingClass(node);
-        if (owner !== null) registered.add(owner);
+        registered.add(owner);
       },
       "ClassDeclaration:exit": check,
       "ClassExpression:exit": check,

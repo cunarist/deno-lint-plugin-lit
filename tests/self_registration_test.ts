@@ -36,6 +36,30 @@ Deno.test("self-registration: allows registering via a stored host", () => {
   );
 });
 
+Deno.test("self-registration: allows registering via a renamed stored field", () => {
+  assertValid(
+    plugin,
+    `class BarController implements ReactiveController {
+      _host: ReactiveControllerHost;
+      constructor(host: ReactiveControllerHost) {
+        this._host = host;
+        this._host.addController(this);
+      }
+    }`,
+  );
+});
+
+Deno.test("self-registration: allows registering via a renamed parameter", () => {
+  assertValid(
+    plugin,
+    `class BarController implements ReactiveController {
+      constructor(controllerHost: ReactiveControllerHost) {
+        controllerHost.addController(this);
+      }
+    }`,
+  );
+});
+
 Deno.test("self-registration: ignores non-controllers", () => {
   assertValid(plugin, "class Store { constructor() {} }");
 });

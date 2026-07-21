@@ -38,9 +38,10 @@ class SizeController {
 
 ## Notes
 
-- `this.host` and `this.#host` are the accepted receivers because
-  `lit-reactive-controller/host-constructor` requires the host to be stored
-  under that name.
+- `this.host` and `this.#host` are the accepted receivers, by convention. This
+  strict rule matches on spelling and does not detect the stored host, so a
+  controller keeping its host under another name (`this._host.requestUpdate()`)
+  is flagged — spell the nudge `this.host`/`this.#host`, or exclude this rule.
 - Deliberately **not** gated to Lit components. The permitted form lives in a
   controller, which is not a component, so gating on the component class would
   make the escape hatch unreachable. The consequence is that this fires on any

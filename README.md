@@ -255,7 +255,7 @@ next to each other.
 | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | [`host-constructor`](src/reactive-controller/host-constructor.md)                           | a controller constructor that is not exactly `constructor(host: ReactiveControllerHost)` |
 | [`lifecycle-allowlist`](src/reactive-controller/lifecycle-allowlist.md)                     | any lifecycle override on a Lit component other than `styles` and `render`               |
-| [`no-unused-host`](src/reactive-controller/no-unused-host.md)                               | a controller that stores `host` or `#host` as a field but never reads it                 |
+| [`no-unused-host`](src/reactive-controller/no-unused-host.md)                               | a controller that stores its host in a field but never reads it                          |
 | [`paired-lifecycle`](src/reactive-controller/paired-lifecycle.md)                           | a controller that defines `hostConnected` or `hostDisconnected` but not both             |
 | [`require-abort-signal-in-fetch`](src/reactive-controller/require-abort-signal-in-fetch.md) | a `fetch(...)` inside a reactive controller that passes no `signal` option               |
 | [`self-registration`](src/reactive-controller/self-registration.md)                         | a controller that does not call `host.addController(this)` in its constructor            |

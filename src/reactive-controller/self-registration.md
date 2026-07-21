@@ -30,10 +30,11 @@ class BarController implements ReactiveController {
 
 ## Notes
 
-`host-constructor` requires the host parameter to be named `host` and stored as
-`this.#host`, which is what makes these receivers exhaustive.
-
-Accepted receivers are `host`, `this.host`, and `this.#host`, so registering
+Accepted receivers are the host parameter itself and the field it is stored in.
+Both are found by the `ReactiveControllerHost` type, not by name, so a renamed
+parameter (`controllerHost.addController(this)`) or a renamed field
+(`this._host.addController(this)`) still counts. `host`, `this.host`, and
+`this.#host` are always accepted as the conventional spellings. Registering
 through a stored host works:
 
 ```ts

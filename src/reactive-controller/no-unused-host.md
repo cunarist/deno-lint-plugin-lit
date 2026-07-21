@@ -1,7 +1,6 @@
 # no-unused-host
 
-Rejects a controller that stores `host` or `#host` as a field but never reads
-it.
+Rejects a controller that stores its host in a field but never reads it.
 
 ## Why
 
@@ -50,11 +49,13 @@ class BarController implements ReactiveController {
 
 ## Notes
 
-`host-constructor` requires the host to be stored as `this.#host`, so that is
-the field this rule looks at. Without that rule on, a controller keeping the
-host under another name is not checked.
+The stored field is found by following the constructor's
+`ReactiveControllerHost` parameter to its `this.<field> = host` assignment — so
+`#host`, `_host`, or any other name is tracked, and the rule does not depend on
+`host-constructor`. Only a non-static property definition of that name is
+watched; a host stored via an alias, destructuring, or a nested target is
+unanalyzable and left alone.
 
-Only `this.#host` and `this.host` count as the stored host, and only a
-non-static property definition declares one. A read anywhere in the class body
-satisfies the rule, including inside an arrow-function field. Appearing as the
-left-hand side of `this.#host = …` is a write, not a read.
+A read anywhere in the class body satisfies the rule, including inside an
+arrow-function field. Appearing as the left-hand side of `this.<field> = …` is a
+write, not a read.
