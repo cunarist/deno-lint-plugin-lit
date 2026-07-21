@@ -23,18 +23,14 @@ class El extends LitElement {
 
 // GOOD
 class El extends LitElement {
-  #input = null;
-
-  #onInput = (el) => {
-    this.#input = el ?? null;
-  };
+  #input = createRef<HTMLInputElement>();
 
   focusInput() {
-    this.#input?.focus();
+    this.#input.value?.focus();
   }
 
   render() {
-    const inputRef = ref(this.#onInput);
+    const inputRef = ref(this.#input);
     return html`<input ${inputRef}>`;
   }
 }
@@ -48,4 +44,5 @@ class El extends LitElement {
 - Any receiver counts inside a component, not just the render root:
   `document.querySelector(...)` in a component is reported too.
 - Pairs with `no-query-decorators`, which bans the decorator form of the same
-  idea, and `no-create-ref`, which pins down which `ref` spelling to use.
+  idea, and `prefer-create-ref`, which turns a bare stash callback into a
+  `createRef`.

@@ -6,13 +6,13 @@
  * `lifecycle-allowlist` bans — including that rule's own example.
  */
 
+import { assertEquals } from "@std/assert";
+
 import { coreRules } from "#core";
 import { domRefRules } from "#dom-ref";
 import { namingRules } from "#naming";
 import { reactiveControllerRules } from "#reactive-controller";
 import { strictRules } from "#strict";
-
-import { assertEquals } from "@std/assert";
 
 const everything: Deno.lint.Plugin = {
   name: "lit",

@@ -1,18 +1,18 @@
 /**
- * `lit-dom-ref` — reach the DOM through a named `ref` callback, nothing else.
+ * `lit-dom-ref` — reach the DOM through a `createRef` ref, nothing else.
  *
  * @module
  */
 
-import { noCreateRef } from "./no-create-ref.ts";
 import { noDomQuery } from "./no-dom-query.ts";
 import { noQueryDecorators } from "./no-query-decorators.ts";
+import { preferCreateRef } from "./prefer-create-ref.ts";
 
 /** The `lit-dom-ref` rules, for composing your own plugin. */
 export const domRefRules: Record<string, Deno.lint.Rule> = {
-  "no-create-ref": noCreateRef,
   "no-dom-query": noDomQuery,
   "no-query-decorators": noQueryDecorators,
+  "prefer-create-ref": preferCreateRef,
 };
 
 /**
@@ -24,8 +24,8 @@ const plugin: Deno.lint.Plugin = {
 };
 
 // Individual rules, re-exported for composition.
-export { noCreateRef } from "./no-create-ref.ts";
 export { noDomQuery } from "./no-dom-query.ts";
 export { noQueryDecorators } from "./no-query-decorators.ts";
+export { preferCreateRef } from "./prefer-create-ref.ts";
 
 export default plugin;

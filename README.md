@@ -180,7 +180,7 @@ feature that this ruleset declines to use.
 
 ## `/dom-ref`
 
-One idea: the only way to reach an element is a `ref` callback you named.
+One idea: the only way to reach an element is a `ref` bound to a `createRef`.
 
 `@query` answers two questions badly: **which** element, and **when**.
 
@@ -189,8 +189,8 @@ One idea: the only way to reach an element is a `ref` callback you named.
 - **When** — it is a lazy `querySelector`. It answers any time you ask,
   including `null` before the first render.
 
-A `ref` callback settles both: it is bound to one position, and Lit calls it
-with the element as it attaches and `undefined` as it goes away.
+A `ref` settles both: it is bound to one position, and Lit fills its `createRef`
+as the element attaches and clears it as it goes away.
 
 ```ts
 // BAD
@@ -205,14 +205,10 @@ class Bad extends LitElement {
 
 // GOOD
 class Good extends LitElement {
-  #input: HTMLInputElement | undefined;
-
-  #setInput = (el: Element | undefined) => {
-    this.#input = el as HTMLInputElement | undefined;
-  };
+  #input = createRef<HTMLInputElement>();
 
   override render() {
-    const inputRef = ref(this.#setInput);
+    const inputRef = ref(this.#input);
     return html`<input ${inputRef}>`;
   }
 }
@@ -220,9 +216,9 @@ class Good extends LitElement {
 
 | Rule                                                        | Catches                                                                                                                                     |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`no-create-ref`](src/dom-ref/no-create-ref.md)             | `createRef`, both the import and any call to it                                                                                             |
 | [`no-dom-query`](src/dom-ref/no-dom-query.md)               | `querySelector` and `querySelectorAll` inside a Lit component                                                                               |
 | [`no-query-decorators`](src/dom-ref/no-query-decorators.md) | `@query`, `@queryAll`, `@queryAsync`, `@queryAssignedElements`, and `@queryAssignedNodes`, and their imports from the Lit decorator modules |
+| [`prefer-create-ref`](src/dom-ref/prefer-create-ref.md)     | a `ref` callback that only stashes the element, in favour of `createRef`                                                                    |
 
 ## `/reactive-controller`
 
