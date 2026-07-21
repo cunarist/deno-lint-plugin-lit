@@ -279,6 +279,12 @@ a rule keyed on methods called `sync*` does nothing in a codebase that does not
 use that name, and misfires in one that uses it for something else. Rule
 behaviour must follow from Lit semantics, not from what things are called.
 
+**Inferring a type's meaning from its name is forbidden — no rule may decide
+what a type is by what it is called.** Guessing that `MyDialog` is a concrete
+web-component class, or that `~Element` names a host, is the same naming-heuristic
+hack: it misfires on unrelated names and stays silent on a type named anything
+else. A rule must read structure, never spelling.
+
 `no-unused-host` (flag a controller storing its host but never reading it) was
 dropped as redundant. Under `noUnusedLocals`, TS already reports a write-only
 `#host` with TS6133 — and `#host` is the idiomatic private field. The only gap
