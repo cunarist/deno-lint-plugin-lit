@@ -44,8 +44,10 @@ Deno.test("require-dashed-tag: rejects a spec-reserved name", () => {
   );
 });
 
-Deno.test("require-dashed-tag: ignores non-Lit classes", () => {
-  assertValid(plugin, '@customElement("editor")\nclass Editor {}');
+Deno.test("require-dashed-tag: ignores a component with no @customElement", () => {
+  // `@customElement` now marks a class as Lit, so the ignored case is a Lit
+  // component that registers no tag at all — there is nothing to check.
+  assertValid(plugin, "class Editor extends LitElement {}");
 });
 
 Deno.test("require-dashed-tag: highlights the tag literal", () => {

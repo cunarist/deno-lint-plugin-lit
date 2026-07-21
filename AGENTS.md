@@ -148,6 +148,20 @@ Checked empirically against Deno 2.9.3 — do not re-litigate:
 - There is **no cross-file resolution**. A rule that needs the superclass chain
   can only scan `Program.body` of the same module. A base class imported from
   elsewhere is unanalyzable — a real limitation to document per rule, not a bug.
+- **`isLitComponent` detects by same-file facts, any one of four.** It extends
+  `LitElement`/`ReactiveElement` (following the superclass chain within the
+  module), carries `@customElement`, has a `render()` returning an `html`/`svg`
+  template, or declares `static styles` built from `css`. It is intentionally
+  _not_ `extends LitElement` alone: cross-file and cross-library bases are
+  common, so a name-only base check silently skips real components. `render()`
+  the _name_ and `extends HTMLElement` were rejected — the first is a method
+  name any framework uses, the second means the class is a plain element, not a
+  Lit one. The residual miss is a class whose only Lit-ness is an off-file base
+  with none of the four local signals. `no-manual-update` needs no help from
+  this: a `this.requestUpdate()` receiver only exists on a `ReactiveElement`, so
+  the call itself is the signal — but it still gates on `isLitComponent`, so an
+  off-file base with no local signal is the shared limitation, not a
+  rule-specific one.
 - **Import-map aliases are fine for shipping, but break path-loading.** Internal
   imports use `#helpers` (mapped in `deno.json`). `deno publish` rewrites
   specifiers to fully-qualified ones at publish time, so consumers installing

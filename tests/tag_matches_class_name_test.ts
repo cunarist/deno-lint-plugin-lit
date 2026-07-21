@@ -27,9 +27,8 @@ Deno.test("tag-matches-class-name: allows a tag with no prefix", () => {
   );
 });
 
-Deno.test("tag-matches-class-name: ignores unregistered or non-Lit classes", () => {
+Deno.test("tag-matches-class-name: ignores an unregistered component", () => {
   assertValid(plugin, "export class PathBar extends LitElement {}");
-  assertValid(plugin, '@customElement("cl-side-bar") class PathBar {}');
 });
 
 Deno.test("tag-matches-class-name: rejects a tag naming another class", () => {

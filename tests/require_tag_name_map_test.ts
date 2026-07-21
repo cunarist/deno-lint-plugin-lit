@@ -35,7 +35,6 @@ Deno.test("require-tag-name-map: allows the entry declared after the class", () 
 
 Deno.test("require-tag-name-map: ignores unregistered classes", () => {
   assertValid(plugin, "export class PathBar extends LitElement {}");
-  assertValid(plugin, '@customElement("cl-path-bar") class PathBar {}');
 });
 
 Deno.test("require-tag-name-map: rejects a missing augmentation", () => {

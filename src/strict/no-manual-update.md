@@ -58,8 +58,10 @@ class ClockController implements ReactiveController {
 - Only `this.<method>()` inside a Lit component is rejected.
   `super.performUpdate()` (delegation), a bare `element.requestUpdate()` outside
   any component, and a controller nudging its host are all left alone. The
-  component is identified by its base class, so a subclass of a locally-defined
-  base is not seen — there is no cross-file resolution.
+  component is detected by `isLitComponent` — extends a Lit base (with same-file
+  chain), `@customElement`, `render()` returning `html`, or `static styles` from
+  `css` — so a class whose only Lit-ness is an off-file base with none of those
+  signals is not seen.
 - One legitimate `this.requestUpdate()` remains inside a component: a custom
   reactive-property accessor, where you write the setter yourself and Lit needs
   the call (`this.requestUpdate("foo", old)`). This rule still flags it; exclude

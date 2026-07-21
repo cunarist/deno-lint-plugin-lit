@@ -39,10 +39,12 @@ Deno.test("no-this-in-static-styles: ignores other static fields", () => {
 });
 
 Deno.test("no-this-in-static-styles: ignores non-Lit classes", () => {
+  // A static `styles` built from `css` now marks the class as Lit, so a genuine
+  // non-Lit class must not use it — `this` here is the class object, not a host.
   assertValid(
     plugin,
     `class Plain {
-      static styles = css\`\${this.color}\`;
+      static styles = this.color;
     }`,
   );
 });

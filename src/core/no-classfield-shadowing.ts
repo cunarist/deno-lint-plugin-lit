@@ -103,25 +103,26 @@ function superClassName(node: ClassNode): string | null {
 }
 
 /**
- * Ancestor classes declared in the same module, nearest first. Returns null
- * when the chain does not reach a Lit component.
+ * Ancestor classes declared in the same module, nearest first, or null when the
+ * class is not a Lit component. `isLitComponent` already follows the superclass
+ * chain, so this only re-walks it to collect the same-module ancestors whose
+ * reactive properties a field here could shadow.
  */
 function litAncestors(node: ClassNode): ClassNode[] | null {
-  if (isLitComponent(node)) return [];
+  if (!isLitComponent(node)) return null;
   const program = programOf(node);
-  if (!program) return null;
+  if (!program) return [];
   const ancestors: ClassNode[] = [];
   let current: ClassNode = node;
   for (let depth = 0; depth < MAX_DEPTH; depth += 1) {
     const name = superClassName(current);
-    if (name === null) return null;
+    if (name === null) break;
     const parent = findClassNamed(program, name);
-    if (!parent || parent === current) return null;
+    if (!parent || parent === current) break;
     ancestors.push(parent);
-    if (isLitComponent(parent)) return ancestors;
     current = parent;
   }
-  return null;
+  return ancestors;
 }
 
 /** Whether a member is a plain, emitted instance field. */

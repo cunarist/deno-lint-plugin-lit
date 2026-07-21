@@ -53,6 +53,39 @@ Deno.test("no-manual-update: ignores code outside a component", () => {
   assertValid(plugin, "class Store { go() { this.requestUpdate(); } }");
 });
 
+Deno.test("no-manual-update: detects the component by any Lit signal", () => {
+  // @customElement
+  assertInvalid(
+    plugin,
+    '@customElement("x-el") class El { go() { this.requestUpdate(); } }',
+  );
+  // render() returning an html template
+  assertInvalid(
+    plugin,
+    "class El { render() { return html`<b></b>`; } go() { this.requestUpdate(); } }",
+  );
+  // static styles built from css
+  assertInvalid(
+    plugin,
+    "class El { static styles = css`:host{}`; go() { this.requestUpdate(); } }",
+  );
+  // a same-file base that extends a Lit base
+  assertInvalid(
+    plugin,
+    `class Base extends LitElement {}
+     class El extends Base { go() { this.requestUpdate(); } }`,
+  );
+});
+
+Deno.test("no-manual-update: cannot see an off-file base with no local signal", () => {
+  // The base is imported, and nothing local marks the class as Lit. There is no
+  // cross-file resolution, so this is an accepted miss.
+  assertValid(
+    plugin,
+    "class El extends ImportedBase { go() { this.requestUpdate(); } }",
+  );
+});
+
 Deno.test("no-manual-update: allows super delegation", () => {
   assertValid(
     plugin,

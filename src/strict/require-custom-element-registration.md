@@ -44,6 +44,8 @@ customElements.define("cl-panel", PanelElement);
   is treated as a base class and skipped. A class extended in the same file but
   _not_ exported is still reported, since a purely local base has no reason to
   be one.
-- Only `LitElement`, `ReactiveElement`, and `UpdatingElement` subclasses are
-  considered. A class extending a base imported from elsewhere is not
-  recognisable as a component and is left alone.
+- A class counts as a component when it extends `LitElement`/`ReactiveElement`
+  (following the superclass chain within the file), has a `render()` returning
+  an `html` template, or declares `static styles` built from `css`. A class
+  whose only Lit-ness is a base imported from another module, with none of those
+  local signals, is not recognisable and is left alone.
