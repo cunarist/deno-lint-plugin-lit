@@ -265,6 +265,14 @@ a rule keyed on methods called `sync*` does nothing in a codebase that does not
 use that name, and misfires in one that uses it for something else. Rule
 behaviour must follow from Lit semantics, not from what things are called.
 
+`no-unused-host` (flag a controller storing its host but never reading it) was
+dropped as redundant. Under `noUnusedLocals`, TS already reports a write-only
+`#host` with TS6133 — and `#host` is the idiomatic private field. The only gap
+was a write-only _public_ field (`this.host`), which TS never flags, and a
+dedicated rule for that lone shape did not pull its weight.
+`controllerHostField` in `helpers/lit.ts` — added for it — stays, because
+`self-registration` uses it to recognize registration through a renamed host.
+
 ## Decorators
 
 Every rule assumes **standard (TC39) decorators**, which is the default in Deno

@@ -7,7 +7,6 @@
 
 import { hostConstructor } from "./host-constructor.ts";
 import { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
-import { noUnusedHost } from "./no-unused-host.ts";
 import { pairedLifecycle } from "./paired-lifecycle.ts";
 import { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";
 import { selfRegistration } from "./self-registration.ts";
@@ -16,7 +15,6 @@ import { selfRegistration } from "./self-registration.ts";
 export const reactiveControllerRules: Record<string, Deno.lint.Rule> = {
   "host-constructor": hostConstructor,
   "lifecycle-allowlist": lifecycleAllowlist,
-  "no-unused-host": noUnusedHost,
   "paired-lifecycle": pairedLifecycle,
   "require-abort-signal-in-fetch": requireAbortSignalInFetch,
   "self-registration": selfRegistration,
@@ -34,7 +32,6 @@ const plugin: Deno.lint.Plugin = {
 // Individual rules, re-exported for composition.
 export { hostConstructor } from "./host-constructor.ts";
 export { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
-export { noUnusedHost } from "./no-unused-host.ts";
 export { pairedLifecycle } from "./paired-lifecycle.ts";
 export { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";
 export { selfRegistration } from "./self-registration.ts";
