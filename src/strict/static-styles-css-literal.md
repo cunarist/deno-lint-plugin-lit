@@ -1,15 +1,17 @@
 # static-styles-css-literal
 
 A `static styles` member must be a direct `css` tagged template — not an array,
-a reference, a call, or a getter.
+a reference, a call, or a getter — and must hold no `${…}` interpolation.
 
 ## Why
 
-One component, one stylesheet, written where the component is. An array of
-shared stylesheets means the rules that apply to an element are spread across
-files, and changing a shared entry silently restyles every consumer. A
-reference, a factory call, or a getter each hide the actual CSS behind a name,
-so you cannot read a component's styles without chasing the definition.
+CSS variables are the standard way to build a theme system and to share styling
+across components. Set a token once on an ancestor and every descendant sees it;
+each component reads it with `var(--app-accent)` and keeps its own rules in one
+readable `css` literal.
+
+One component, one stylesheet, written where the component is — coherent and
+readable in one place.
 
 ## Examples
 
@@ -29,11 +31,18 @@ class C extends LitElement {
   }
 }
 
-// GOOD
 class D extends LitElement {
+  static styles = css`
+    ${base} p {}
+  `;
+}
+
+// GOOD
+class Z extends LitElement {
   static styles = css`
     :host {
       display: block;
+      color: var(--app-accent);
     }
   `;
 }
@@ -43,9 +52,19 @@ class D extends LitElement {
 
 - Non-static `styles`, other static members, and a `declare static styles`
   type-only declaration are all ignored.
-- An array gets its own message (`static styles is an array.`) since that is the
-  common case; everything else reports as not being a `css` literal.
+- An array and an interpolating `css` template each get their own message; every
+  other shape reports as not being a `css` literal.
 - The tag must literally be `css`. An `html` template assigned to
   `static styles` is also rejected.
-- Share rules through custom properties or a plain `css` literal you inline, not
-  through a stylesheet array.
+- Theme and share styles through CSS variables, not a stylesheet array.
+- When a whole stylesheet must reach the shadow root — a third-party sheet CSS
+  variables cannot express — adopt it in `createRenderRoot`, not through
+  `static styles`:
+
+  ```ts
+  protected override createRenderRoot() {
+    const root = super.createRenderRoot();
+    root.adoptedStyleSheets = [newStyleSheet, ...root.adoptedStyleSheets];
+    return root;
+  }
+  ```

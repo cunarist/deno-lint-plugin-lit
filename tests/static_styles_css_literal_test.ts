@@ -47,6 +47,19 @@ Deno.test("static-styles-css-literal: rejects other expressions", () => {
   assertInvalid(plugin, "class X { static styles = html`p{}`; }");
 });
 
+Deno.test("static-styles-css-literal: rejects interpolation in the css literal", () => {
+  const code = "class X { static styles = css`${base} p{}`; }";
+  const [diagnostic] = assertInvalid(plugin, code);
+  if (!diagnostic) throw new Error("expected a diagnostic");
+  if (
+    diagnostic.message !==
+      "`static styles` interpolates into the `css` template."
+  ) {
+    throw new Error(`unexpected message: ${diagnostic.message}`);
+  }
+  assertReportedText(code, diagnostic, "base");
+});
+
 Deno.test("static-styles-css-literal: rejects a static getter", () => {
   const [diagnostic] = assertInvalid(
     plugin,
