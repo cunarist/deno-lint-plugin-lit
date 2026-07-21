@@ -1,6 +1,6 @@
 {
   "name": "@cunarist/deno-lint-plugin-lit",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "license": "MIT",
   "exports": {
     "./core": "./src/core/mod.ts",
