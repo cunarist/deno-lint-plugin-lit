@@ -21,7 +21,7 @@ Five plugins. Each says something different about the code it rejects:
 | Plugin                 | Says                                              | Rules |
 | ---------------------- | ------------------------------------------------- | ----- |
 | `/core`                | This does not do what it looks like it does.      | 53    |
-| `/strict`              | Demanding, but we think you should.               | 18    |
+| `/strict`              | Demanding, but we think you should.               | 17    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
 | `/reactive-controller` | Anything with a lifetime belongs in a controller. | 6     |
 | `/naming`              | What elements and controllers are called.         | 4     |
@@ -179,7 +179,6 @@ feature that this ruleset declines to use.
 | [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | Missing: every `LitElement` subclass in a file to be registered, either with `@customElement` or with `customElements.define`                                                                                                                                                  |
 | [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file                                                                                                                                                            |
 | [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file                                                                                                                                                               |
-| [`static-styles-css-literal`](src/strict/static-styles-css-literal.md)                         | A `static styles` member must be a direct `css` tagged template — not an array, a reference, a call, or a getter — with no `${…}` interpolation                                                                                                                                |
 
 ## `/dom-ref`
 

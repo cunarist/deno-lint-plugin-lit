@@ -50,5 +50,3 @@ class Card extends LitElement {
   element does.
 - The diagnostic highlights the opening `<style>` tag, not the whole element.
 - Only `html` and `svg` tagged templates are checked.
-- The replacement must itself be a direct `css` literal — see
-  `lit-strict/static-styles-css-literal`.
