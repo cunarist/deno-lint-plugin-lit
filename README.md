@@ -2,6 +2,9 @@
 
 Lint rules for [Lit](https://lit.dev) Web Components, for `deno lint`.
 
+Good for letting an AI write your components: the rules catch the Lit mistakes a
+model makes. Battle-tested on real code.
+
 ## Setup
 
 ```jsonc
