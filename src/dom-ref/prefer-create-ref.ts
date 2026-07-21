@@ -6,9 +6,10 @@
  * no `undefined`/`null` juggling, and `.value` reads it back by name.
  *
  * Only fires when the callback is provably a bare stash: its body is one
- * assignment of the callback's own parameter — optionally `?? null`,
- * `?? undefined`, `as T`, or `!` — to some target. A callback that does
- * anything more (registers a listener, reads other state) is left alone.
+ * assignment whose stored value is the element itself — reached through any
+ * cast, `!`, `?? …`, or `?:` branch (`el`, `el ?? null`, `el as T`,
+ * `el instanceof X ? el : null`). A callback that stores a value derived from
+ * the element (`el.offsetWidth`) or does more is left alone.
  *
  * The callback is resolved within the same file only. An inline arrow is read
  * directly; `ref(this.#store)` looks up the class member; a free identifier is
@@ -38,32 +39,27 @@ function memberName(
   return null;
 }
 
-/** Whether a node is `null` or `undefined`, the tail of a `?? …` normalise. */
-function isNullish(node: Deno.lint.Expression): boolean {
-  return (node.type === "Literal" && node.value === null) ||
-    (node.type === "Identifier" && node.name === "undefined");
-}
-
-/** Strip `as T`, `!`, and `?? null` / `?? undefined` off an assignment RHS. */
-function unwrapStash(expr: Deno.lint.Expression): Deno.lint.Expression {
-  let current = expr;
-  for (;;) {
-    if (current.type === "TSAsExpression") {
-      current = current.expression;
-      continue;
-    }
-    if (current.type === "TSNonNullExpression") {
-      current = current.expression;
-      continue;
-    }
-    if (
-      current.type === "LogicalExpression" && current.operator === "??" &&
-      isNullish(current.right)
-    ) {
-      current = current.left;
-      continue;
-    }
-    return current;
+/**
+ * Whether an expression's value is the callback parameter itself, reached
+ * through any identity-preserving wrapper: a cast, `!`, the left of `?? …`, or
+ * either branch of a `?:`. A projection of the element — `el.offsetWidth`,
+ * `wrap(el)` — is deliberately not, because that value is no longer the
+ * element and `createRef` could not hold it.
+ */
+function isParamValue(expr: Deno.lint.Expression, param: string): boolean {
+  switch (expr.type) {
+    case "Identifier":
+      return expr.name === param;
+    case "TSAsExpression":
+    case "TSNonNullExpression":
+      return isParamValue(expr.expression, param);
+    case "LogicalExpression":
+      return expr.operator === "??" && isParamValue(expr.left, param);
+    case "ConditionalExpression":
+      return isParamValue(expr.consequent, param) ||
+        isParamValue(expr.alternate, param);
+    default:
+      return false;
   }
 }
 
@@ -92,8 +88,7 @@ function isPureStash(fn: Callback): boolean {
   const assignment = bodyAssignment(fn);
   if (assignment === null) return false;
   if (!isSimpleReference(assignment.left)) return false;
-  const source = unwrapStash(assignment.right);
-  return source.type === "Identifier" && source.name === param.name;
+  return isParamValue(assignment.right, param.name);
 }
 
 /** Whether a function binds `name` as a parameter, shadowing outer scopes. */

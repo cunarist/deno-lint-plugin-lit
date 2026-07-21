@@ -81,10 +81,24 @@ Deno.test("prefer-create-ref: allows a callback that does more", () => {
   );
 });
 
-Deno.test("prefer-create-ref: allows an RHS that is not the parameter", () => {
-  assertValid(
+Deno.test("prefer-create-ref: flags a type-narrowing ternary stash", () => {
+  assertInvalid(
+    plugin,
+    "class A extends LitElement { render() { const r = ref((el) => { this.#input = el instanceof HTMLDivElement ? el : null; }); return html`<b>`; } }",
+  );
+});
+
+Deno.test("prefer-create-ref: flags a ?? fallback stash", () => {
+  assertInvalid(
     plugin,
     "class A extends LitElement { render() { const r = ref((el) => (this.#input = el ?? this.#fallback)); return html`<b>`; } }",
+  );
+});
+
+Deno.test("prefer-create-ref: allows storing a value derived from the element", () => {
+  assertValid(
+    plugin,
+    "class A extends LitElement { render() { const r = ref((el) => (this.#width = el?.offsetWidth)); return html`<b>`; } }",
   );
   assertValid(
     plugin,

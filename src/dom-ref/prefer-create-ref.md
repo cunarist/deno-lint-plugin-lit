@@ -45,9 +45,11 @@ class El extends LitElement {
 
 ## Notes
 
-- Only a bare stash fires: one assignment of the callback's own parameter —
-  allowing `?? null`, `?? undefined`, `as T`, or `!` — to a target. A callback
-  that reads other state or calls anything is left alone.
+- Only a bare stash fires: the callback's one assignment must store the element
+  itself — reached through any cast, `!`, `?? …`, or a `?:` whose branch is the
+  element (so `el ?? null` and an `instanceof` type-narrow both count). Storing
+  a value _derived_ from it (`el.offsetWidth`) is not a stash: `createRef` holds
+  the element, not a projection of it, so those callbacks are left alone.
 - The callback is resolved within the same file. An inline arrow is read
   directly; `ref(this.#store)` looks up the class member; a free identifier is
   traced to its declaration. Anything ambiguous — reassigned, a parameter, or
