@@ -1,16 +1,18 @@
 /**
  * `no-manual-update`
  *
- * `requestUpdate`, `performUpdate`, and `scheduleUpdate` are scheduling escape
- * hatches. The only legitimate caller is a `ReactiveController` nudging its own
- * host, so the call must go through `this.host.*` or `this.#host.*`.
+ * A Lit component does not schedule its own renders. `requestUpdate`,
+ * `performUpdate`, and `scheduleUpdate` on `this` mean some state driving the
+ * template is not a reactive property; make it one instead of nudging the
+ * scheduler.
  *
- * Deliberately not gated on `isLitComponent`: the permitted form lives in a
- * controller, which is not a component, and inside a component every such call
- * is a violation anyway.
+ * A `ReactiveController` nudging its host is a different call on a different
+ * object, and a controller is not a component, so it never reaches this rule —
+ * the host escape hatch is automatic, not a spelling exception. `super.` calls
+ * are delegation, not manual scheduling, and are left alone.
  */
 
-import { memberPath } from "#helpers";
+import { enclosingClass, isLitComponent } from "#helpers";
 
 /** Update-scheduling methods Lit exposes on `ReactiveElement`. */
 const SCHEDULING_METHODS: readonly string[] = [
@@ -19,12 +21,9 @@ const SCHEDULING_METHODS: readonly string[] = [
   "scheduleUpdate",
 ];
 
-/** Receivers a controller may legitimately schedule an update on. */
-const ALLOWED_RECEIVERS: readonly string[] = ["this.host", "this.#host"];
-
 /**
- * Rejects `requestUpdate`, `performUpdate`, and `scheduleUpdate` unless
- * called on `this.host` or `this.#host`.
+ * Rejects `this.requestUpdate()`, `this.performUpdate()`, and
+ * `this.scheduleUpdate()` inside a Lit component.
  */
 export const noManualUpdate: Deno.lint.Rule = {
   create(ctx) {
@@ -32,18 +31,21 @@ export const noManualUpdate: Deno.lint.Rule = {
       CallExpression(node) {
         const callee = node.callee;
         if (callee.type !== "MemberExpression" || callee.computed) return;
+        // `this.x()` only: `super.x()` is delegation, a bare `x()` is a local.
+        if (callee.object.type !== "ThisExpression") return;
         const property = callee.property;
         if (property.type !== "Identifier") return;
         if (!SCHEDULING_METHODS.includes(property.name)) return;
 
-        const receiver = memberPath(callee.object);
-        if (receiver !== null && ALLOWED_RECEIVERS.includes(receiver)) return;
+        const owner = enclosingClass(node);
+        if (owner === null || !isLitComponent(owner)) return;
 
         ctx.report({
           node: callee,
-          message: `Manual update scheduling via \`${property.name}\`.`,
+          message:
+            `Component schedules its own update via \`${property.name}\`.`,
           hint:
-            "Let reactive properties drive rendering. Only a ReactiveController may call `this.host." +
+            "Drive rendering with a reactive property (`@state`/`@property`) instead of calling `this." +
             `${property.name}()\`.`,
         });
       },
