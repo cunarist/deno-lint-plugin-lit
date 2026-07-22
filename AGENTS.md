@@ -60,7 +60,7 @@ subject matter, decides where a rule goes.
       "jsr:@cunarist/deno-lint-plugin-lit/core",
       "jsr:@cunarist/deno-lint-plugin-lit/strict"
     ],
-    "rules": { "exclude": ["lit-strict/no-timers"] }
+    "rules": { "exclude": ["lit-strict/no-light-dom"] }
   }
 }
 ```

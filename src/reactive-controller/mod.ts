@@ -7,16 +7,20 @@
 
 import { hostConstructor } from "./host-constructor.ts";
 import { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
+import { noComponentDisposables } from "./no-component-disposables.ts";
+import { noFetchInComponent } from "./no-fetch-in-component.ts";
+import { noTimers } from "./no-timers.ts";
 import { pairedLifecycle } from "./paired-lifecycle.ts";
-import { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";
 import { selfRegistration } from "./self-registration.ts";
 
 /** The `lit-reactive-controller` rules, for composing your own plugin. */
 export const reactiveControllerRules: Record<string, Deno.lint.Rule> = {
   "host-constructor": hostConstructor,
   "lifecycle-allowlist": lifecycleAllowlist,
+  "no-component-disposables": noComponentDisposables,
+  "no-fetch-in-component": noFetchInComponent,
+  "no-timers": noTimers,
   "paired-lifecycle": pairedLifecycle,
-  "require-abort-signal-in-fetch": requireAbortSignalInFetch,
   "self-registration": selfRegistration,
 };
 
@@ -32,8 +36,10 @@ const plugin: Deno.lint.Plugin = {
 // Individual rules, re-exported for composition.
 export { hostConstructor } from "./host-constructor.ts";
 export { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
+export { noComponentDisposables } from "./no-component-disposables.ts";
+export { noFetchInComponent } from "./no-fetch-in-component.ts";
+export { noTimers } from "./no-timers.ts";
 export { pairedLifecycle } from "./paired-lifecycle.ts";
-export { requireAbortSignalInFetch } from "./require-abort-signal-in-fetch.ts";
 export { selfRegistration } from "./self-registration.ts";
 
 export default plugin;

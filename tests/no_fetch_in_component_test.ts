@@ -1,4 +1,4 @@
-import { noFetchInComponent } from "#strict";
+import { noFetchInComponent } from "#reactive-controller";
 
 import {
   assertInvalid,

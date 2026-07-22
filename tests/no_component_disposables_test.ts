@@ -1,4 +1,4 @@
-import { noComponentDisposables } from "#strict";
+import { noComponentDisposables } from "#reactive-controller";
 
 import {
   assertInvalid,

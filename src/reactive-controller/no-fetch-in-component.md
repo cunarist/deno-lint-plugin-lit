@@ -44,7 +44,7 @@ class PathBar extends LitElement {
   (`this.#api.fetch(...)`) is a different function and is not checked — the
   delegation this rule asks for is not itself a violation.
 - Passing a `signal` does not exempt the call. The objection is that the
-  component owns the request at all; `require-abort-signal-in-controller-fetch`
-  is the rule that cares about the signal, once the request is in a controller.
+  component owns the request at all — move it to a controller, where
+  `hostDisconnected` can abort it.
 - Scope is a class extending a Lit base. A `fetch` at module scope or in a plain
   helper class is not this rule's business.

@@ -1,4 +1,4 @@
-import { noTimers } from "#strict";
+import { noTimers } from "#reactive-controller";
 
 import {
   assertInvalid,
