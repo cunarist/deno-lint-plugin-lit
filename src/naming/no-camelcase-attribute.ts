@@ -3,7 +3,8 @@
  *
  * The HTML parser lowercases every attribute name, so `<x-y myProp=${v}>` sets
  * an attribute called `myprop`. A component that declares `myProp` never sees
- * it, and the binding silently does nothing.
+ * it, and the binding silently does nothing. Kebab-case is the fix, so snake_case
+ * (`my_prop`) is rejected too — it is not an attribute style anyone reaches for.
  *
  * Only plain attributes are checked. `.myProp=`, `@myEvent=` and `?myFlag=` are
  * handled by Lit itself, not by the HTML parser, and stay case-sensitive.
@@ -29,7 +30,8 @@ const SIGILS = ".@?";
 const JSX_NAMES: ReadonlySet<string> = new Set(["classname", "htmlfor"]);
 
 /**
- * Rejects an attribute name containing uppercase letters.
+ * Rejects an attribute name that is not kebab-case — one with uppercase
+ * letters or an underscore.
  */
 export const noCamelcaseAttribute: Deno.lint.Rule = {
   create(ctx) {
@@ -56,18 +58,30 @@ export const noCamelcaseAttribute: Deno.lint.Rule = {
             const name = equals < 0 ? raw : raw.slice(0, equals);
             if (name.length === 0) continue;
             if (SIGILS.includes(name[0] ?? "")) continue;
-            if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) continue;
-            if (name === name.toLowerCase()) continue;
-            if (JSX_NAMES.has(name.toLowerCase())) continue;
-            ctx.report({
-              range: source.toSourceRange(
-                location.startOffset,
-                location.startOffset + name.length,
-              ),
-              message: `Attribute \`${name}\` has uppercase letters.`,
-              hint:
-                `HTML lowercases attribute names — write \`${name.toLowerCase()}\`, or bind the property with \`.${name}=\`.`,
-            });
+            if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(name)) continue;
+            const hasUppercase = name !== name.toLowerCase();
+            const hasUnderscore = name.includes("_");
+            if (!hasUppercase && !hasUnderscore) continue;
+            if (hasUppercase && JSX_NAMES.has(name.toLowerCase())) continue;
+            const range = source.toSourceRange(
+              location.startOffset,
+              location.startOffset + name.length,
+            );
+            if (hasUppercase) {
+              ctx.report({
+                range,
+                message: `Attribute \`${name}\` has uppercase letters.`,
+                hint:
+                  `HTML lowercases attribute names — write \`${name.toLowerCase()}\`, or bind the property with \`.${name}=\`.`,
+              });
+            } else {
+              const kebab = name.replace(/_/g, "-");
+              ctx.report({
+                range,
+                message: `Attribute \`${name}\` uses snake_case.`,
+                hint: `Attribute names are kebab-case — write \`${kebab}\`.`,
+              });
+            }
           }
         });
       },

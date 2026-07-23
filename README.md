@@ -268,8 +268,8 @@ they live together.
 | Rule                                                                   | Catches                                                                                              |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | [`attribute-names`](src/naming/attribute-names.md)                     | a camelCase reactive property that does not declare an explicit `attribute` option                   |
-| [`event-name-case`](src/naming/event-name-case.md)                     | an event name with uppercase letters in `new CustomEvent(...)` or `new Event(...)`                   |
-| [`no-camelcase-attribute`](src/naming/no-camelcase-attribute.md)       | an attribute name containing uppercase letters                                                       |
+| [`event-name-case`](src/naming/event-name-case.md)                     | an event name that is not kebab-case — uppercase or `_` — in `new CustomEvent(...)`/`new Event(...)` |
+| [`no-camelcase-attribute`](src/naming/no-camelcase-attribute.md)       | an attribute name that is not kebab-case — uppercase or `_`                                          |
 | [`require-controller-suffix`](src/naming/require-controller-suffix.md) | a reactive controller class whose name does not end in `Controller`                                  |
 | [`require-element-suffix`](src/naming/require-element-suffix.md)       | a registered component class whose name does not end in `Element`                                    |
 | [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | a custom element name that carries no namespace segment                                              |

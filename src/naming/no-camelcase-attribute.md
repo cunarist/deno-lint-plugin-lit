@@ -1,6 +1,7 @@
 # no-camelcase-attribute
 
-Rejects an attribute name containing uppercase letters.
+Rejects an attribute name that is not kebab-case — one with uppercase letters or
+an underscore.
 
 ## Why
 
@@ -9,7 +10,9 @@ The HTML parser lowercases every attribute name before Lit ever sees it, so
 never observes it, and the binding does nothing at all — no error, no warning.
 
 Either use the kebab-case attribute the component actually exposes, or bind the
-property directly, which is case-sensitive.
+property directly, which is case-sensitive. `snake_case` is rejected for the
+same reason kebab-case is required: one attribute style, no `my_prop` sitting
+beside `my-prop`.
 
 ## Examples
 
@@ -23,7 +26,7 @@ const t = html`<x-y .myProp=${this.v}></x-y>`;
 
 ```ts
 // BAD
-const t = html`<x-y itemCount="3"></x-y>`;
+const t = html`<x-y item_count="3"></x-y>`;
 
 // GOOD
 const t = html`<x-y item-count="3"></x-y>`;

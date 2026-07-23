@@ -38,6 +38,17 @@ Deno.test("no-camelcase-attribute: rejects a camelCase attribute", () => {
   assertInvalid(plugin, 'const t = html`<x-y itemCount="3"></x-y>`;');
 });
 
+Deno.test("no-camelcase-attribute: rejects a snake_case attribute", () => {
+  const [diagnostic] = assertInvalid(
+    plugin,
+    "const t = html`<x-y my_prop=${this.v}></x-y>`;",
+  );
+  if (!diagnostic) throw new Error("expected a diagnostic");
+  if (!diagnostic.hint?.includes("my-prop")) {
+    throw new Error(`unexpected hint: ${diagnostic.hint}`);
+  }
+});
+
 Deno.test("no-camelcase-attribute: reports each offender", () => {
   assertInvalid(
     plugin,

@@ -5,7 +5,8 @@
  * `animationend`). Event names are matched as plain strings, so
  * `addEventListener("itemselected")` silently never fires against an event
  * dispatched as `"itemSelected"` — there is no compiler, and no runtime warning.
- * Staying lowercase, or lowercase with dashes, removes the whole class of typo.
+ * Requiring kebab-case — lowercase words joined by dashes, no underscores —
+ * removes the whole class of typo and keeps one spelling for every event.
  */
 
 /** Event names that are legitimately mixed-case in the platform. */
@@ -19,16 +20,17 @@ const EVENT_CONSTRUCTORS: ReadonlySet<string> = new Set([
   "CustomEvent",
 ]);
 
-/** Lowercase form of a name, with camel humps turned into dashes. */
+/** Kebab-case form: camel humps and underscores turned into dashes. */
 function suggest(name: string): string {
   return name
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/_/g, "-")
     .toLowerCase();
 }
 
 /**
  * Requires the name given to `new CustomEvent(...)` or `new Event(...)` to
- * be all lowercase.
+ * be kebab-case — no uppercase letters and no underscores.
  */
 export const eventNameCase: Deno.lint.Rule = {
   create(ctx) {
@@ -41,11 +43,11 @@ export const eventNameCase: Deno.lint.Rule = {
         if (!first || first.type !== "Literal") return;
         const name = first.value;
         if (typeof name !== "string") return;
-        if (name === name.toLowerCase()) return;
         if (ALLOWED_MIXED_CASE.has(name)) return;
+        if (name === name.toLowerCase() && !name.includes("_")) return;
         ctx.report({
           node: first,
-          message: `Event name "${name}" is not lowercase.`,
+          message: `Event name "${name}" is not kebab-case.`,
           hint: `Use "${suggest(name)}" instead.`,
         });
       },

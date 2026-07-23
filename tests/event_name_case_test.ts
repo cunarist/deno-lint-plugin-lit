@@ -40,6 +40,17 @@ Deno.test("event-name-case: rejects a PascalCase name", () => {
   assertInvalid(plugin, 'new CustomEvent("ItemSelected", { bubbles: true });');
 });
 
+Deno.test("event-name-case: rejects a snake_case name", () => {
+  const [diagnostic] = assertInvalid(
+    plugin,
+    'new CustomEvent("item_selected");',
+  );
+  if (!diagnostic) throw new Error("expected a diagnostic");
+  if (!diagnostic.hint?.includes('"item-selected"')) {
+    throw new Error(`unexpected hint: ${diagnostic.hint}`);
+  }
+});
+
 Deno.test("event-name-case: suggests a dashed lowercase name", () => {
   const [diagnostic] = assertInvalid(
     plugin,
