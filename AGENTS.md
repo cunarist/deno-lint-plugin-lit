@@ -35,7 +35,7 @@ belongs in this file, not in chat.
   _type_ keyword only: the runtime operator (`typeof x === "string"`) is fine
   and is used throughout the rules.
 
-### Packaging: why there are four entry points
+### Packaging: why there are five entry points
 
 Deno's plugin API is `{ name, rules }` — **no tags, no presets, and no per-rule
 options** (`RuleContext` has no `options`). Verified: `deno.json`
@@ -52,6 +52,7 @@ subject matter, decides where a rule goes.
 | `./strict`              | `lit-strict`              | Demanding, but we think you should               |
 | `./dom-ref`             | `lit-dom-ref`             | Reach the DOM through a named `ref`              |
 | `./reactive-controller` | `lit-reactive-controller` | Anything with a lifetime belongs in a controller |
+| `./naming`              | `lit-naming`              | What elements and controllers are called         |
 
 ```jsonc
 {
@@ -80,7 +81,7 @@ configured: `ban-attributes` (a denylist with no denylist is useless) and
 became `tag-matches-class-name`, which needs no configuration: strip any prefix
 segments, and the rest must PascalCase to the class name.
 
-There is **no root `.` export.** A barrel that only re-exported the four groups
+There is **no root `.` export.** A barrel that only re-exported the five groups
 lowered the JSR score and earned nothing: each entry point already exports its
 rules individually alongside its `*Rules` record, so composing a custom
 `lint.ts` works by importing from the specific subpaths. Do not add one back —

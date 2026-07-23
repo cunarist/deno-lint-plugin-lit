@@ -101,8 +101,8 @@ description rather than a program.
 | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | [`attribute-value-entities`](src/core/attribute-value-entities.md)                             | an unescaped `&`, `<`, `>` or `"` inside a static attribute value in an `html` template                                 |
 | [`binding-positions`](src/core/binding-positions.md)                                           | a `${…}` binding used as a tag name, in a closing tag, or as an attribute name                                          |
-| [`composed-requires-bubbles`](src/core/composed-requires-bubbles.md)                           | Missing: `bubbles: true` whenever an event is constructed with `composed: true`                                         |
-| [`event-name-case`](src/core/event-name-case.md)                                               | Missing: the name given to `new CustomEvent(...)` or `new Event(...)` to be all lowercase                               |
+| [`composed-requires-bubbles`](src/core/composed-requires-bubbles.md)                           | an event constructed with `composed: true` but without `bubbles: true`                                                  |
+| [`event-name-case`](src/core/event-name-case.md)                                               | an event name with uppercase letters in `new CustomEvent(...)` or `new Event(...)`                                      |
 | [`lifecycle-super`](src/core/lifecycle-super.md)                                               | an override of a Lit lifecycle callback that never calls its own `super` implementation                                 |
 | [`no-array-mutation-without-reassign`](src/core/no-array-mutation-without-reassign.md)         | calling a mutating array method on a reactive property                                                                  |
 | [`no-async-lifecycle`](src/core/no-async-lifecycle.md)                                         | `async` on a Lit lifecycle hook                                                                                         |
@@ -143,10 +143,10 @@ description rather than a program.
 | [`no-value-attribute`](src/core/no-value-attribute.md)                                         | a bound `value=${…}` attribute on a form control; use the property binding `.value=${…}`                                |
 | [`prefer-static-styles`](src/core/prefer-static-styles.md)                                     | a `<style>` element inside an `html` template                                                                           |
 | [`require-accessor-with-decorators`](src/core/require-accessor-with-decorators.md)             | a `@property` or `@state` decorator on a plain class field instead of an `accessor` field                               |
-| [`require-context-type`](src/core/require-context-type.md)                                     | Missing: `createContext()` from `@lit/context` to be given an explicit type argument                                    |
+| [`require-context-type`](src/core/require-context-type.md)                                     | a `createContext()` call from `@lit/context` with no explicit type argument                                             |
 | [`require-dashed-tag`](src/core/require-dashed-tag.md)                                         | a custom element name the registry will not accept                                                                      |
-| [`require-dispatch-on-this`](src/core/require-dispatch-on-this.md)                             | Missing: a component's events to be dispatched on the component itself                                                  |
-| [`require-property-type`](src/core/require-property-type.md)                                   | Missing: `{type: …}` on every `@property` that has an attribute                                                         |
+| [`require-dispatch-on-this`](src/core/require-dispatch-on-this.md)                             | a component event dispatched on something other than the component itself                                               |
+| [`require-property-type`](src/core/require-property-type.md)                                   | a `@property` that has an attribute but declares no `{type: …}`                                                         |
 | [`require-repeat-key`](src/core/require-repeat-key.md)                                         | `repeat(items, template)` — the two-argument form, with no key function                                                 |
 | [`require-scalar-reflect`](src/core/require-scalar-reflect.md)                                 | `reflect: true` unless the options prove the value is a scalar                                                          |
 | [`simple-template-expressions`](src/core/simple-template-expressions.md)                       | Every `${…}` binding in an `html` template must be an identifier, `this`, or a non-computed member chain — nothing else |
@@ -160,22 +160,22 @@ few will fire on code that works. `createContext("key")` is valid Lit. A class
 registered from a barrel file looks unregistered here. Light DOM is a real Lit
 feature that this ruleset declines to use.
 
-| Rule                                                                                           | Catches                                                                                                                       |
-| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [`attribute-names`](src/strict/attribute-names.md)                                             | a camelCase reactive property that does not declare an explicit `attribute` option                                            |
-| [`directive-allowlist`](src/strict/directive-allowlist.md)                                     | every import from a Lit `directives/` module except `lit/directives/ref.js` and `lit/directives/repeat.js`                    |
-| [`no-boolean-property-default-true`](src/strict/no-boolean-property-default-true.md)           | a boolean reactive property whose default is not literal `false`                                                              |
-| [`no-event-target-subclass`](src/strict/no-event-target-subclass.md)                           | a class that extends `EventTarget`                                                                                            |
-| [`no-light-dom`](src/strict/no-light-dom.md)                                                   | `createRenderRoot()` returning `this`, which renders the component into the light DOM                                         |
-| [`no-manual-update`](src/strict/no-manual-update.md)                                           | a Lit component scheduling its own update with `requestUpdate`, `performUpdate`, or `scheduleUpdate`                          |
-| [`no-property-assignment-in-constructor`](src/strict/no-property-assignment-in-constructor.md) | assigning a reactive property inside `constructor()`                                                                          |
-| [`no-string-context-key`](src/strict/no-string-context-key.md)                                 | a string literal as the key passed to `createContext()`                                                                       |
-| [`no-update-complete`](src/strict/no-update-complete.md)                                       | any access to `updateComplete`                                                                                                |
-| [`prefer-context-decorators`](src/strict/prefer-context-decorators.md)                         | constructing a `ContextProvider` or `ContextConsumer` by hand inside a Lit component                                          |
-| [`prefer-decorators`](src/strict/prefer-decorators.md)                                         | a `static properties` declaration on a Lit component                                                                          |
-| [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | Missing: every `LitElement` subclass in a file to be registered, either with `@customElement` or with `customElements.define` |
-| [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file           |
-| [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file              |
+| Rule                                                                                           | Catches                                                                                                             |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [`attribute-names`](src/strict/attribute-names.md)                                             | a camelCase reactive property that does not declare an explicit `attribute` option                                  |
+| [`directive-allowlist`](src/strict/directive-allowlist.md)                                     | every import from a Lit `directives/` module except `lit/directives/ref.js` and `lit/directives/repeat.js`          |
+| [`no-boolean-property-default-true`](src/strict/no-boolean-property-default-true.md)           | a boolean reactive property whose default is not literal `false`                                                    |
+| [`no-event-target-subclass`](src/strict/no-event-target-subclass.md)                           | a class that extends `EventTarget`                                                                                  |
+| [`no-light-dom`](src/strict/no-light-dom.md)                                                   | `createRenderRoot()` returning `this`, which renders the component into the light DOM                               |
+| [`no-manual-update`](src/strict/no-manual-update.md)                                           | a Lit component scheduling its own update with `requestUpdate`, `performUpdate`, or `scheduleUpdate`                |
+| [`no-property-assignment-in-constructor`](src/strict/no-property-assignment-in-constructor.md) | assigning a reactive property inside `constructor()`                                                                |
+| [`no-string-context-key`](src/strict/no-string-context-key.md)                                 | a string literal as the key passed to `createContext()`                                                             |
+| [`no-update-complete`](src/strict/no-update-complete.md)                                       | any access to `updateComplete`                                                                                      |
+| [`prefer-context-decorators`](src/strict/prefer-context-decorators.md)                         | constructing a `ContextProvider` or `ContextConsumer` by hand inside a Lit component                                |
+| [`prefer-decorators`](src/strict/prefer-decorators.md)                                         | a `static properties` declaration on a Lit component                                                                |
+| [`require-custom-element-registration`](src/strict/require-custom-element-registration.md)     | a `LitElement` subclass that is never registered, with neither `@customElement` nor `customElements.define`         |
+| [`require-event-in-event-map`](src/strict/require-event-in-event-map.md)                       | an event constructed inside a Lit component whose name has no matching `HTMLElementEventMap` entry in the same file |
+| [`require-tag-name-map`](src/strict/require-tag-name-map.md)                                   | a component registered with `@customElement` that has no matching `HTMLElementTagNameMap` entry in the same file    |
 
 ## `/dom-ref`
 
@@ -267,9 +267,9 @@ reader can tell an element from a controller from a plain class at a glance.
 
 | Rule                                                                   | Catches                                                                                              |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| [`require-controller-suffix`](src/naming/require-controller-suffix.md) | Missing: a reactive controller class name to end in `Controller`                                     |
-| [`require-element-suffix`](src/naming/require-element-suffix.md)       | Missing: a registered component class name to end in `Element`                                       |
-| [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | Missing: a custom element name to carry a namespace segment                                          |
+| [`require-controller-suffix`](src/naming/require-controller-suffix.md) | a reactive controller class whose name does not end in `Controller`                                  |
+| [`require-element-suffix`](src/naming/require-element-suffix.md)       | a registered component class whose name does not end in `Element`                                    |
+| [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | a custom element name that carries no namespace segment                                              |
 | [`tag-matches-class-name`](src/naming/tag-matches-class-name.md)       | a `@customElement` tag whose segments, after any leading prefix, do not PascalCase to the class name |
 
 ## Known limits
