@@ -4,7 +4,6 @@
  * @module
  */
 
-import { attributeNames } from "./attribute-names.ts";
 import { directiveAllowlist } from "./directive-allowlist.ts";
 import { noBooleanPropertyDefaultTrue } from "./no-boolean-property-default-true.ts";
 import { noEventTargetSubclass } from "./no-event-target-subclass.ts";
@@ -21,7 +20,6 @@ import { requireTagNameMap } from "./require-tag-name-map.ts";
 
 /** The `lit-strict` rules, for composing your own plugin. */
 export const strictRules: Record<string, Deno.lint.Rule> = {
-  "attribute-names": attributeNames,
   "directive-allowlist": directiveAllowlist,
   "no-boolean-property-default-true": noBooleanPropertyDefaultTrue,
   "no-event-target-subclass": noEventTargetSubclass,
@@ -46,7 +44,6 @@ const plugin: Deno.lint.Plugin = {
 };
 
 // Individual rules, re-exported for composition.
-export { attributeNames } from "./attribute-names.ts";
 export { directiveAllowlist } from "./directive-allowlist.ts";
 export { noBooleanPropertyDefaultTrue } from "./no-boolean-property-default-true.ts";
 export { noEventTargetSubclass } from "./no-event-target-subclass.ts";

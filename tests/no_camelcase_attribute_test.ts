@@ -1,4 +1,4 @@
-import { noCamelcaseAttribute } from "#core";
+import { noCamelcaseAttribute } from "#naming";
 
 import {
   assertInvalid,

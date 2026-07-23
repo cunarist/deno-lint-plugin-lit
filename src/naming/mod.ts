@@ -1,9 +1,12 @@
 /**
- * `lit-naming` — what elements and controllers are called.
+ * `lit-naming` — what elements, controllers, attributes, and events are called.
  *
  * @module
  */
 
+import { attributeNames } from "./attribute-names.ts";
+import { eventNameCase } from "./event-name-case.ts";
+import { noCamelcaseAttribute } from "./no-camelcase-attribute.ts";
 import { requireControllerSuffix } from "./require-controller-suffix.ts";
 import { requireElementSuffix } from "./require-element-suffix.ts";
 import { requireTagPrefix } from "./require-tag-prefix.ts";
@@ -11,6 +14,9 @@ import { tagMatchesClassName } from "./tag-matches-class-name.ts";
 
 /** The `lit-naming` rules, for composing your own plugin. */
 export const namingRules: Record<string, Deno.lint.Rule> = {
+  "attribute-names": attributeNames,
+  "event-name-case": eventNameCase,
+  "no-camelcase-attribute": noCamelcaseAttribute,
   "require-controller-suffix": requireControllerSuffix,
   "require-element-suffix": requireElementSuffix,
   "require-tag-prefix": requireTagPrefix,
@@ -26,6 +32,9 @@ const plugin: Deno.lint.Plugin = {
 };
 
 // Individual rules, re-exported for composition.
+export { attributeNames } from "./attribute-names.ts";
+export { eventNameCase } from "./event-name-case.ts";
+export { noCamelcaseAttribute } from "./no-camelcase-attribute.ts";
 export { requireControllerSuffix } from "./require-controller-suffix.ts";
 export { requireElementSuffix } from "./require-element-suffix.ts";
 export { requireTagPrefix } from "./require-tag-prefix.ts";

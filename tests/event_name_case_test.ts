@@ -1,4 +1,4 @@
-import { eventNameCase } from "#core";
+import { eventNameCase } from "#naming";
 
 import {
   assertInvalid,

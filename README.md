@@ -20,11 +20,11 @@ Five plugins. Each says something different about the code it rejects:
 
 | Plugin                 | Says                                              | Rules |
 | ---------------------- | ------------------------------------------------- | ----- |
-| `/core`                | This does not do what it looks like it does.      | 53    |
-| `/strict`              | Demanding, but we think you should.               | 14    |
+| `/core`                | This does not do what it looks like it does.      | 51    |
+| `/strict`              | Demanding, but we think you should.               | 13    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
 | `/reactive-controller` | Anything with a lifetime belongs in a controller. | 7     |
-| `/naming`              | What elements and controllers are called.         | 4     |
+| `/naming`              | What things are called.                           | 7     |
 
 Add the ones you want:
 
@@ -102,13 +102,11 @@ description rather than a program.
 | [`attribute-value-entities`](src/core/attribute-value-entities.md)                             | an unescaped `&`, `<`, `>` or `"` inside a static attribute value in an `html` template                                 |
 | [`binding-positions`](src/core/binding-positions.md)                                           | a `${…}` binding used as a tag name, in a closing tag, or as an attribute name                                          |
 | [`composed-requires-bubbles`](src/core/composed-requires-bubbles.md)                           | an event constructed with `composed: true` but without `bubbles: true`                                                  |
-| [`event-name-case`](src/core/event-name-case.md)                                               | an event name with uppercase letters in `new CustomEvent(...)` or `new Event(...)`                                      |
 | [`lifecycle-super`](src/core/lifecycle-super.md)                                               | an override of a Lit lifecycle callback that never calls its own `super` implementation                                 |
 | [`no-array-mutation-without-reassign`](src/core/no-array-mutation-without-reassign.md)         | calling a mutating array method on a reactive property                                                                  |
 | [`no-async-lifecycle`](src/core/no-async-lifecycle.md)                                         | `async` on a Lit lifecycle hook                                                                                         |
 | [`no-async-render`](src/core/no-async-render.md)                                               | an `async render()` on a Lit component                                                                                  |
 | [`no-attribute-property-binding-conflict`](src/core/no-attribute-property-binding-conflict.md) | the same name bound as both an attribute and a property on one element                                                  |
-| [`no-camelcase-attribute`](src/core/no-camelcase-attribute.md)                                 | an attribute name containing uppercase letters                                                                          |
 | [`no-classfield-shadowing`](src/core/no-classfield-shadowing.md)                               | a plain class field whose name matches a reactive property                                                              |
 | [`no-context-mutation-by-consumer`](src/core/no-context-mutation-by-consumer.md)               | assignment to a field declared with `@consume`                                                                          |
 | [`no-dispatch-in-render`](src/core/no-dispatch-in-render.md)                                   | calling `dispatchEvent(...)` from `render()`                                                                            |
@@ -162,7 +160,6 @@ feature that this ruleset declines to use.
 
 | Rule                                                                                           | Catches                                                                                                             |
 | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [`attribute-names`](src/strict/attribute-names.md)                                             | a camelCase reactive property that does not declare an explicit `attribute` option                                  |
 | [`directive-allowlist`](src/strict/directive-allowlist.md)                                     | every import from a Lit `directives/` module except `lit/directives/ref.js` and `lit/directives/repeat.js`          |
 | [`no-boolean-property-default-true`](src/strict/no-boolean-property-default-true.md)           | a boolean reactive property whose default is not literal `false`                                                    |
 | [`no-event-target-subclass`](src/strict/no-event-target-subclass.md)                           | a class that extends `EventTarget`                                                                                  |
@@ -262,11 +259,17 @@ next to each other.
 
 ## `/naming`
 
-Pure convention — nothing here changes what the code does. The point is that a
-reader can tell an element from a controller from a plain class at a glance.
+What things are called. Some of these are pure convention — a reader can tell an
+element from a controller from a plain class at a glance. Others catch a real
+trap: an uppercase attribute or event name is silently lowercased or never
+matched, so the binding quietly does nothing. Either way the fix is a rename, so
+they live together.
 
 | Rule                                                                   | Catches                                                                                              |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`attribute-names`](src/naming/attribute-names.md)                     | a camelCase reactive property that does not declare an explicit `attribute` option                   |
+| [`event-name-case`](src/naming/event-name-case.md)                     | an event name with uppercase letters in `new CustomEvent(...)` or `new Event(...)`                   |
+| [`no-camelcase-attribute`](src/naming/no-camelcase-attribute.md)       | an attribute name containing uppercase letters                                                       |
 | [`require-controller-suffix`](src/naming/require-controller-suffix.md) | a reactive controller class whose name does not end in `Controller`                                  |
 | [`require-element-suffix`](src/naming/require-element-suffix.md)       | a registered component class whose name does not end in `Element`                                    |
 | [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | a custom element name that carries no namespace segment                                              |

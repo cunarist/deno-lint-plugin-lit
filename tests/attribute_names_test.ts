@@ -1,4 +1,4 @@
-import { attributeNames } from "#strict";
+import { attributeNames } from "#naming";
 
 import {
   assertInvalid,

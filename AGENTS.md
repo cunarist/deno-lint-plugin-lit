@@ -52,7 +52,7 @@ subject matter, decides where a rule goes.
 | `./strict`              | `lit-strict`              | Demanding, but we think you should               |
 | `./dom-ref`             | `lit-dom-ref`             | Reach the DOM through a named `ref`              |
 | `./reactive-controller` | `lit-reactive-controller` | Anything with a lifetime belongs in a controller |
-| `./naming`              | `lit-naming`              | What elements and controllers are called         |
+| `./naming`              | `lit-naming`              | What things are called                           |
 
 ```jsonc
 {

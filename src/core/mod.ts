@@ -8,13 +8,11 @@
 import { attributeValueEntities } from "./attribute-value-entities.ts";
 import { bindingPositions } from "./binding-positions.ts";
 import { composedRequiresBubbles } from "./composed-requires-bubbles.ts";
-import { eventNameCase } from "./event-name-case.ts";
 import { lifecycleSuper } from "./lifecycle-super.ts";
 import { noArrayMutationWithoutReassign } from "./no-array-mutation-without-reassign.ts";
 import { noAsyncLifecycle } from "./no-async-lifecycle.ts";
 import { noAsyncRender } from "./no-async-render.ts";
 import { noAttributePropertyBindingConflict } from "./no-attribute-property-binding-conflict.ts";
-import { noCamelcaseAttribute } from "./no-camelcase-attribute.ts";
 import { noClassfieldShadowing } from "./no-classfield-shadowing.ts";
 import { noContextMutationByConsumer } from "./no-context-mutation-by-consumer.ts";
 import { noDispatchInRender } from "./no-dispatch-in-render.ts";
@@ -64,13 +62,11 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "attribute-value-entities": attributeValueEntities,
   "binding-positions": bindingPositions,
   "composed-requires-bubbles": composedRequiresBubbles,
-  "event-name-case": eventNameCase,
   "lifecycle-super": lifecycleSuper,
   "no-array-mutation-without-reassign": noArrayMutationWithoutReassign,
   "no-async-lifecycle": noAsyncLifecycle,
   "no-async-render": noAsyncRender,
   "no-attribute-property-binding-conflict": noAttributePropertyBindingConflict,
-  "no-camelcase-attribute": noCamelcaseAttribute,
   "no-classfield-shadowing": noClassfieldShadowing,
   "no-context-mutation-by-consumer": noContextMutationByConsumer,
   "no-dispatch-in-render": noDispatchInRender,
@@ -128,13 +124,11 @@ const plugin: Deno.lint.Plugin = {
 export { attributeValueEntities } from "./attribute-value-entities.ts";
 export { bindingPositions } from "./binding-positions.ts";
 export { composedRequiresBubbles } from "./composed-requires-bubbles.ts";
-export { eventNameCase } from "./event-name-case.ts";
 export { lifecycleSuper } from "./lifecycle-super.ts";
 export { noArrayMutationWithoutReassign } from "./no-array-mutation-without-reassign.ts";
 export { noAsyncLifecycle } from "./no-async-lifecycle.ts";
 export { noAsyncRender } from "./no-async-render.ts";
 export { noAttributePropertyBindingConflict } from "./no-attribute-property-binding-conflict.ts";
-export { noCamelcaseAttribute } from "./no-camelcase-attribute.ts";
 export { noClassfieldShadowing } from "./no-classfield-shadowing.ts";
 export { noContextMutationByConsumer } from "./no-context-mutation-by-consumer.ts";
 export { noDispatchInRender } from "./no-dispatch-in-render.ts";
