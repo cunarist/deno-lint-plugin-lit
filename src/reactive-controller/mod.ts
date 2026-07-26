@@ -5,6 +5,8 @@
  * @module
  */
 
+import "#build";
+
 import { hostConstructor } from "./host-constructor.ts";
 import { lifecycleAllowlist } from "./lifecycle-allowlist.ts";
 import { noComponentDisposables } from "./no-component-disposables.ts";

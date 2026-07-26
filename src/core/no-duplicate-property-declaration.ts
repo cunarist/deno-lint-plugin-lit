@@ -51,7 +51,7 @@ function decoratedNames(node: ClassNode): Set<string> {
 export const noDuplicatePropertyDeclaration: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       const decorated = decoratedNames(node);
       if (decorated.size === 0) return;
 

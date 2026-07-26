@@ -37,9 +37,12 @@ const HINT =
   "Delegate to a ReactiveController that acquires the resource in `hostConnected` and releases it in `hostDisconnected`.";
 
 /** Whether the node sits inside a Lit component class body. */
-function inLitComponent(node: Deno.lint.Node): boolean {
+function inLitComponent(
+  node: Deno.lint.Node,
+  ctx: Deno.lint.RuleContext,
+): boolean {
   const owner = enclosingClass(node);
-  return owner !== null && isLitComponent(owner);
+  return owner !== null && isLitComponent(owner, ctx);
 }
 
 /** Last segment of a dotted path, e.g. `globalThis.Worker` -> `Worker`. */
@@ -60,7 +63,7 @@ export const noComponentDisposables: Deno.lint.Rule = {
       NewExpression(node) {
         const name = lastSegment(memberPath(node.callee));
         if (name === null || !DISPOSABLE_CONSTRUCTORS.includes(name)) return;
-        if (!inLitComponent(node)) return;
+        if (!inLitComponent(node, ctx)) return;
         ctx.report({
           node: node.callee,
           message: `Lit component constructs \`${name}\`.`,
@@ -74,7 +77,7 @@ export const noComponentDisposables: Deno.lint.Rule = {
         if (property.type !== "Identifier") return;
         const name = property.name;
         if (!DISPOSABLE_METHODS.includes(name)) return;
-        if (!inLitComponent(node)) return;
+        if (!inLitComponent(node, ctx)) return;
         ctx.report({
           node: callee,
           message: `Lit component calls \`${name}\`.`,

@@ -58,7 +58,7 @@ export const requireEventInEventMap: Deno.lint.Rule = {
         if (constructor === null) return;
         if (!EVENT_CONSTRUCTORS.includes(constructor)) return;
         const owner = enclosingClass(node);
-        if (owner === null || !isLitComponent(owner)) return;
+        if (owner === null || !isLitComponent(owner, ctx)) return;
         const first = node.arguments[0];
         if (!first || first.type !== "Literal") return;
         if (typeof first.value !== "string") return;

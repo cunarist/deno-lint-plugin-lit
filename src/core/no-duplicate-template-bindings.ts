@@ -10,7 +10,7 @@
  * sigil is part of the attribute name, so its namespacing falls out for free.
  */
 
-import { parseFragment } from "npm:parse5@^8.0.1";
+import { parseFragment } from "parse5";
 
 import { isHtmlTemplate, templateSource } from "#helpers";
 
@@ -50,7 +50,7 @@ export const noDuplicateTemplateBindings: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const source = templateSource(node);
 
         parseFragment(source.text, {

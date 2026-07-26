@@ -64,7 +64,7 @@ function check(
   ctx: Deno.lint.RuleContext,
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): void {
-  if (!isLitComponent(node)) return;
+  if (!isLitComponent(node, ctx)) return;
   const tag = customElementTag(node);
   if (tag === null) return;
   const className = node.id?.name;

@@ -15,7 +15,7 @@ export const noUselessTemplateLiterals: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const quasis = node.quasi.quasis;
         if (quasis.length !== 2 || node.quasi.expressions.length !== 1) return;
         const before = quasis[0];

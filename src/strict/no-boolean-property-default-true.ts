@@ -110,7 +110,7 @@ export const noBooleanPropertyDefaultTrue: Deno.lint.Rule = {
     }
 
     function check(node: ClassNode): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       const fields = fieldsByName(node);
 
       for (const member of classMembers(node)) {

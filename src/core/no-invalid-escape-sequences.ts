@@ -83,7 +83,7 @@ export const noInvalidEscapeSequences: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const source = templateSource(node);
         const quasis = node.quasi.quasis;
         const expressions = node.quasi.expressions;

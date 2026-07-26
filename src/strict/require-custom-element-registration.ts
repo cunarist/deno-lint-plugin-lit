@@ -80,7 +80,7 @@ export const requireCustomElementRegistration: Deno.lint.Rule = {
       },
       ClassDeclaration(node) {
         noteSuperClass(node);
-        if (!isLitComponent(node)) return;
+        if (!isLitComponent(node, ctx)) return;
         if ((node as unknown as WithAbstract).abstract === true) return;
         if (hasCustomElementDecorator(node)) return;
         const id = node.id;

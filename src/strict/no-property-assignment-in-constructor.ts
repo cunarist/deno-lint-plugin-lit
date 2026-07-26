@@ -120,7 +120,7 @@ export const noPropertyAssignmentInConstructor: Deno.lint.Rule = {
         if (!directlyInConstructor(node)) return;
 
         const klass = enclosingClass(node);
-        if (!klass || !isLitComponent(klass)) return;
+        if (!klass || !isLitComponent(klass, ctx)) return;
         if (!reactivePropertyNames(klass).has(name)) return;
 
         ctx.report({

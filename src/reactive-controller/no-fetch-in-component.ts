@@ -26,7 +26,7 @@ export const noFetchInComponent: Deno.lint.Rule = {
       CallExpression(node) {
         if (!isFetchCallee(node.callee)) return;
         const owner = enclosingClass(node);
-        if (owner === null || !isLitComponent(owner)) return;
+        if (owner === null || !isLitComponent(owner, ctx)) return;
         ctx.report({
           node: node.callee,
           message: "Lit component calls `fetch`.",

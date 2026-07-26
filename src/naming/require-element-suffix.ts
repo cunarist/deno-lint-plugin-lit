@@ -15,7 +15,7 @@ export const requireElementSuffix: Deno.lint.Rule = {
     function check(
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       // Only registered elements: a base class is not an element yet.
       if (customElementTag(node) === null) return;
       const id = node.id;

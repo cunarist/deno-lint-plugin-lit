@@ -66,7 +66,7 @@ export const preferContextDecorators: Deno.lint.Rule = {
           }
           return null;
         })();
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
 
         ctx.report({
           node,

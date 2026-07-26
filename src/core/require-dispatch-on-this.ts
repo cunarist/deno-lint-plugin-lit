@@ -28,7 +28,7 @@ export const requireDispatchOnThis: Deno.lint.Rule = {
         if (SELF_RECEIVERS.includes(receiver)) return;
 
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
 
         ctx.report({
           node,

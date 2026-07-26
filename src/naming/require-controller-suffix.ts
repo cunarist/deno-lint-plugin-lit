@@ -16,7 +16,7 @@ export const requireControllerSuffix: Deno.lint.Rule = {
     function check(
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
-      if (isLitComponent(node) || !isReactiveController(node)) return;
+      if (isLitComponent(node, ctx) || !isReactiveController(node)) return;
       const id = node.id;
       if (!id || id.name.endsWith("Controller")) return;
       ctx.report({

@@ -26,9 +26,12 @@ const DECORATOR_SOURCES: readonly string[] = [
 ];
 
 /** Whether the node sits inside a Lit component class body. */
-function inLitComponent(node: Deno.lint.Node): boolean {
+function inLitComponent(
+  node: Deno.lint.Node,
+  ctx: Deno.lint.RuleContext,
+): boolean {
   const owner = enclosingClass(node);
-  return owner !== null && isLitComponent(owner);
+  return owner !== null && isLitComponent(owner, ctx);
 }
 
 /** The exported name a decorator is bound to on a class member. */
@@ -46,7 +49,7 @@ function checkMember(
   decorators: readonly Deno.lint.Decorator[] | undefined,
 ): void {
   if (!decorators || decorators.length === 0) return;
-  if (!inLitComponent(node)) return;
+  if (!inLitComponent(node, ctx)) return;
   for (const decorator of decorators) {
     const name = decoratorName(decorator);
     if (name === null || !QUERY_DECORATORS.includes(name)) continue;

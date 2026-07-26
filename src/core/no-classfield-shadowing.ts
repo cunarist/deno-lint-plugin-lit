@@ -108,8 +108,11 @@ function superClassName(node: ClassNode): string | null {
  * chain, so this only re-walks it to collect the same-module ancestors whose
  * reactive properties a field here could shadow.
  */
-function litAncestors(node: ClassNode): ClassNode[] | null {
-  if (!isLitComponent(node)) return null;
+function litAncestors(
+  node: ClassNode,
+  ctx: Deno.lint.RuleContext,
+): ClassNode[] | null {
+  if (!isLitComponent(node, ctx)) return null;
   const program = programOf(node);
   if (!program) return [];
   const ancestors: ClassNode[] = [];
@@ -141,7 +144,7 @@ function isPlainInstanceField(
 export const noClassfieldShadowing: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {
-      const ancestors = litAncestors(node);
+      const ancestors = litAncestors(node, ctx);
       if (ancestors === null) return;
 
       const shadowed = staticPropertyNames(node);

@@ -71,7 +71,7 @@ export const lifecycleSuper: Deno.lint.Rule = {
         ) {
           return;
         }
-        if (!isLitComponent(classNode)) return;
+        if (!isLitComponent(classNode, ctx)) return;
         if (chained.has(node)) return;
 
         ctx.report({

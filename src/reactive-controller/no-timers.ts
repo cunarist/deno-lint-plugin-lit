@@ -17,9 +17,12 @@ const TIMER_NAMES: readonly string[] = [
 ];
 
 /** Whether the node sits inside a Lit component class body. */
-function inLitComponent(node: Deno.lint.Node): boolean {
+function inLitComponent(
+  node: Deno.lint.Node,
+  ctx: Deno.lint.RuleContext,
+): boolean {
   const owner = enclosingClass(node);
-  return owner !== null && isLitComponent(owner);
+  return owner !== null && isLitComponent(owner, ctx);
 }
 
 /** The bare name a callee resolves to, e.g. `globalThis.setTimeout` -> `setTimeout`. */
@@ -42,7 +45,7 @@ export const noTimers: Deno.lint.Rule = {
       CallExpression(node) {
         const name = calleeBareName(node.callee);
         if (name === null || !TIMER_NAMES.includes(name)) return;
-        if (!inLitComponent(node)) return;
+        if (!inLitComponent(node, ctx)) return;
         ctx.report({
           node: node.callee,
           message: `Timer \`${name}\` inside a Lit component.`,

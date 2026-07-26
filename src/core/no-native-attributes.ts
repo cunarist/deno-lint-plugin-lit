@@ -58,7 +58,7 @@ export const noNativeAttributes: Deno.lint.Rule = {
     }
 
     function check(node: ClassNode): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       for (const member of classMembers(node)) {
         if (
           member.type !== "PropertyDefinition" &&

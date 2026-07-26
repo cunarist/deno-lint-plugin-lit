@@ -71,10 +71,10 @@ export const noSelfClosingNonVoid: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         // An `svg` template is foreign content throughout, but parse5 parses it
         // as an HTML fragment and cannot know that.
-        if (isTaggedWith(node, "svg")) return;
+        if (isTaggedWith(node, "svg", ctx)) return;
         const source = templateSource(node);
         const fragment = parseTemplate(source.text);
 

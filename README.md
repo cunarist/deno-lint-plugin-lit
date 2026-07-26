@@ -20,7 +20,7 @@ Five plugins. Each says something different about the code it rejects:
 
 | Plugin                 | Says                                              | Rules |
 | ---------------------- | ------------------------------------------------- | ----- |
-| `/core`                | This does not do what it looks like it does.      | 51    |
+| `/core`                | This does not do what it looks like it does.      | 52    |
 | `/strict`              | Demanding, but we think you should.               | 13    |
 | `/dom-ref`             | Reach the DOM through a named `ref` callback.     | 3     |
 | `/reactive-controller` | Anything with a lifetime belongs in a controller. | 7     |
@@ -143,6 +143,7 @@ description rather than a program.
 | [`require-accessor-with-decorators`](src/core/require-accessor-with-decorators.md)             | a `@property` or `@state` decorator on a plain class field instead of an `accessor` field                               |
 | [`require-context-type`](src/core/require-context-type.md)                                     | a `createContext()` call from `@lit/context` with no explicit type argument                                             |
 | [`require-dashed-tag`](src/core/require-dashed-tag.md)                                         | a custom element name the registry will not accept                                                                      |
+| [`require-direct-registration-import`](src/core/require-direct-registration-import.md)         | a template tag whose registering module the file does not import                                                        |
 | [`require-dispatch-on-this`](src/core/require-dispatch-on-this.md)                             | a component event dispatched on something other than the component itself                                               |
 | [`require-property-type`](src/core/require-property-type.md)                                   | a `@property` that has an attribute but declares no `{type: …}`                                                         |
 | [`require-repeat-key`](src/core/require-repeat-key.md)                                         | `repeat(items, template)` — the two-argument form, with no key function                                                 |
@@ -275,14 +276,15 @@ they live together.
 | [`require-tag-prefix`](src/naming/require-tag-prefix.md)               | a custom element name that carries no namespace segment                                              |
 | [`tag-matches-class-name`](src/naming/tag-matches-class-name.md)       | a `@customElement` tag whose segments, after any leading prefix, do not PascalCase to the class name |
 
-## Known limits
+## Cross-file rules
 
-- **No rule options.** Deno's plugin API has no way to configure a rule, so none
-  of these take settings.
-- **One file at a time.** Rules that need a superclass chain or a registration
-  site only see the current module.
-- **Unclosed tags are under-reported.** `<li>`, `<td>`, and `<p>` may legally
-  omit their closing tag, so `no-invalid-html` leaves them alone.
+Some rules need to see past the file they are linting — that a base class in
+another module is a `LitElement`, or which module registers a tag. There is
+nothing to run and nothing is written to your project; it happens on its own.
+
+These rules read the rest of your code as of when the editor last loaded the
+plugin. To pick them up on a change in another file, Restart Deno Server, the
+same as for Deno's own diagnostics.
 
 ## License
 

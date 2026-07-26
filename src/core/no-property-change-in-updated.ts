@@ -84,7 +84,7 @@ export const noPropertyChangeInUpdated: Deno.lint.Rule = {
       const hook = enclosingPostUpdateHook(node);
       if (hook === null) return;
       const classNode = enclosingClass(node);
-      if (!classNode || !isLitComponent(classNode)) return;
+      if (!classNode || !isLitComponent(classNode, ctx)) return;
       const name = thisPropertyName(target);
       if (name === null) return;
       if (!reactivePropertyNames(classNode).has(name)) return;

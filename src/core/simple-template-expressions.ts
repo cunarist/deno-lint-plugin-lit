@@ -207,7 +207,7 @@ export const simpleTemplateExpressions: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         for (const expression of node.quasi.expressions) {
           if (isSimpleReference(expression)) continue;
           const shape = classify(expression);

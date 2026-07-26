@@ -18,7 +18,7 @@ export const noAsyncRender: Deno.lint.Rule = {
         if (keyName(node.key) !== "render") return;
         if (!node.value.async) return;
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         ctx.report({
           node: node.key,
           message: "render() is async.",

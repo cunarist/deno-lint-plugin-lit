@@ -27,7 +27,7 @@ export const requireAccessorWithDecorators: Deno.lint.Rule = {
         if (node.static) return;
         if (!isReactiveProperty(node)) return;
         const owner = enclosingClass(node);
-        if (owner === null || !isLitComponent(owner)) return;
+        if (owner === null || !isLitComponent(owner, ctx)) return;
         const name = keyName(node.key) ?? "the field";
         ctx.report({
           node: node.key,

@@ -52,7 +52,7 @@ export const requireDashedTag: Deno.lint.Rule = {
     function check(
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       const tag = tagLiteral(node);
       if (tag === null) return;
       const reason = rejection(tag.value);

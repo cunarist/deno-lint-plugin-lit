@@ -30,7 +30,7 @@ export const noDispatchInRender: Deno.lint.Rule = {
         if (!isDispatchCallee(node.callee)) return;
         if (!isInsideMethod(node, "render")) return;
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         const path = memberPath(node.callee) ?? "dispatchEvent";
         ctx.report({
           node,

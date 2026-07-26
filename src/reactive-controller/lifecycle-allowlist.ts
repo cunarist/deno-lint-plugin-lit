@@ -25,7 +25,7 @@ function check(
   ctx: Deno.lint.RuleContext,
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
 ): void {
-  if (!isLitComponent(node)) return;
+  if (!isLitComponent(node, ctx)) return;
   for (const member of node.body.body) {
     if (
       member.type !== "MethodDefinition" &&

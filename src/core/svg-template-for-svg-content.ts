@@ -75,7 +75,7 @@ export const svgTemplateForSvgContent: Deno.lint.Rule = {
       TaggedTemplateExpression(node) {
         // `svg` templates are the fix, not the problem; `isHtmlTemplate` would
         // match those too.
-        if (!isTaggedWith(node, "html")) return;
+        if (!isTaggedWith(node, "html", ctx)) return;
         const source = templateSource(node);
 
         const report = (element: ParsedElement): void => {

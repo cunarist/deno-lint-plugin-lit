@@ -61,7 +61,7 @@ function settlesConversion(options: Deno.lint.ObjectExpression): boolean {
 export const requirePropertyType: Deno.lint.Rule = {
   create(ctx) {
     function check(node: ClassNode): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       for (const member of classMembers(node)) {
         if (
           member.type !== "PropertyDefinition" &&

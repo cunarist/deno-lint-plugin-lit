@@ -5,6 +5,8 @@
  * @module
  */
 
+import "#build";
+
 import { attributeValueEntities } from "./attribute-value-entities.ts";
 import { bindingPositions } from "./binding-positions.ts";
 import { composedRequiresBubbles } from "./composed-requires-bubbles.ts";
@@ -49,6 +51,7 @@ import { preferStaticStyles } from "./prefer-static-styles.ts";
 import { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 import { requireContextType } from "./require-context-type.ts";
 import { requireDashedTag } from "./require-dashed-tag.ts";
+import { requireDirectRegistrationImport } from "./require-direct-registration-import.ts";
 import { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 import { requirePropertyType } from "./require-property-type.ts";
 import { requireRepeatKey } from "./require-repeat-key.ts";
@@ -103,6 +106,7 @@ export const coreRules: Record<string, Deno.lint.Rule> = {
   "require-accessor-with-decorators": requireAccessorWithDecorators,
   "require-context-type": requireContextType,
   "require-dashed-tag": requireDashedTag,
+  "require-direct-registration-import": requireDirectRegistrationImport,
   "require-dispatch-on-this": requireDispatchOnThis,
   "require-property-type": requirePropertyType,
   "require-repeat-key": requireRepeatKey,
@@ -165,6 +169,7 @@ export { preferStaticStyles } from "./prefer-static-styles.ts";
 export { requireAccessorWithDecorators } from "./require-accessor-with-decorators.ts";
 export { requireContextType } from "./require-context-type.ts";
 export { requireDashedTag } from "./require-dashed-tag.ts";
+export { requireDirectRegistrationImport } from "./require-direct-registration-import.ts";
 export { requireDispatchOnThis } from "./require-dispatch-on-this.ts";
 export { requirePropertyType } from "./require-property-type.ts";
 export { requireRepeatKey } from "./require-repeat-key.ts";

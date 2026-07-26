@@ -20,8 +20,9 @@ import {
 /** A class in scope for the controller rules. */
 function isControllerClass(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+  ctx: Deno.lint.RuleContext,
 ): boolean {
-  return !isLitComponent(node) && isReactiveController(node);
+  return !isLitComponent(node, ctx) && isReactiveController(node);
 }
 
 /**
@@ -67,7 +68,7 @@ export const selfRegistration: Deno.lint.Rule = {
     function check(
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
-      if (!isControllerClass(node)) return;
+      if (!isControllerClass(node, ctx)) return;
       if (registered.has(node)) return;
       const constructor = findConstructor(node);
       ctx.report({

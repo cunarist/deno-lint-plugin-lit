@@ -82,7 +82,7 @@ export const noPartialPropertyBinding: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const source = templateSource(node);
         const fragment = parseTemplate(source.text);
 

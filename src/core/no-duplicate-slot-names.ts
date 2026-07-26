@@ -43,7 +43,7 @@ export const noDuplicateSlotNames: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const source = templateSource(node);
         if (!/<\s*slot[\s/>]/i.test(source.text)) return;
 

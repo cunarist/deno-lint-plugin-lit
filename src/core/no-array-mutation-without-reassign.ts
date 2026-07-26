@@ -91,7 +91,7 @@ export const noArrayMutationWithoutReassign: Deno.lint.Rule = {
         if (receiver === null) return;
 
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         if (!reactivePropertyNames(classNode).has(receiver)) return;
 
         ctx.report({

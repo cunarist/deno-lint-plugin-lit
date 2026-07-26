@@ -38,7 +38,7 @@ export const noManualUpdate: Deno.lint.Rule = {
         if (!SCHEDULING_METHODS.includes(property.name)) return;
 
         const owner = enclosingClass(node);
-        if (owner === null || !isLitComponent(owner)) return;
+        if (owner === null || !isLitComponent(owner, ctx)) return;
 
         ctx.report({
           node: callee,

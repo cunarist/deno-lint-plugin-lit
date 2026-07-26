@@ -35,7 +35,7 @@ export const noThisAssignInRender: Deno.lint.Rule = {
     function check(node: Deno.lint.Node, target: Deno.lint.Node): void {
       if (!isInsideMethod(node, "render")) return;
       const classNode = enclosingClass(node);
-      if (!classNode || !isLitComponent(classNode)) return;
+      if (!classNode || !isLitComponent(classNode, ctx)) return;
       if (!targetsThis(target)) return;
       const path = memberPath(target as Deno.lint.Expression);
       ctx.report({

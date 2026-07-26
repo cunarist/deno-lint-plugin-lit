@@ -1,12 +1,16 @@
 /** Lit-specific detection helpers. */
 
 import {
+  type FileFacts,
+  fileKey,
+  hashText,
+  type LitTemplateKind,
+  scanFacts,
+} from "#scan-index";
+
+import {
   classDecorators,
-  classMembers,
   findConstructor,
-  findDecorator,
-  findMethod,
-  keyName,
   memberPath,
   typeReferenceName,
 } from "./ast.ts";
@@ -23,15 +27,6 @@ export const LEGACY_LIT_SOURCES: readonly string[] = [
   "lit-html",
   "lit-element",
 ];
-
-/** Base classes that make a subclass a Lit component. */
-const LIT_BASES: readonly string[] = [
-  "LitElement",
-  "ReactiveElement",
-];
-
-/** Tags whose tagged template is a Lit view template. */
-const LIT_TEMPLATE_TAGS: readonly string[] = ["html", "svg"];
 
 /** Lifecycle members Lit defines on `ReactiveElement`/`LitElement`. */
 export const LIT_LIFECYCLE_MEMBERS: readonly string[] = [
@@ -57,155 +52,38 @@ export const REACTIVE_PROPERTY_DECORATORS: readonly string[] = [
   "state",
 ];
 
-/** Whether a value is an AST node (has a string `type`). */
-function isAstNode(value: unknown): value is Deno.lint.Node {
-  return typeof value === "object" && value !== null &&
-    typeof (value as { type?: unknown }).type === "string";
-}
-
-/** Last segment of a tagged template's tag, e.g. `Lit.html` -> `html`. */
-function templateTag(
-  node: Deno.lint.TaggedTemplateExpression,
-): string | null {
-  const path = memberPath(node.tag);
-  return path === null ? null : (path.split(".").pop() ?? path);
-}
-
 /**
- * Whether the subtree rooted at `root` uses a tagged template with one of
- * `tags`. AST fields are prototype getters, so children are reached through
- * `Object.getOwnPropertyNames(Object.getPrototypeOf(node))`, not `Object.keys`.
- * A nested class is not descended into — its templates are its own.
- */
-function subtreeUsesTaggedTemplate(
-  root: Deno.lint.Node,
-  tags: readonly string[],
-): boolean {
-  const seen = new Set<unknown>();
-  const stack: unknown[] = [root];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (!isAstNode(current) || seen.has(current)) continue;
-    seen.add(current);
-    if (current.type === "TaggedTemplateExpression") {
-      const tag = templateTag(current);
-      if (tag !== null && tags.includes(tag)) return true;
-    }
-    if (
-      current !== root &&
-      (current.type === "ClassDeclaration" ||
-        current.type === "ClassExpression")
-    ) {
-      continue;
-    }
-    for (
-      const key of Object.getOwnPropertyNames(Object.getPrototypeOf(current))
-    ) {
-      if (key === "type" || key === "parent" || key === "range") continue;
-      let child: unknown;
-      try {
-        child = (current as unknown as Record<string, unknown>)[key];
-      } catch {
-        continue;
-      }
-      if (Array.isArray(child)) {
-        for (const item of child) if (isAstNode(item)) stack.push(item);
-      } else if (isAstNode(child)) {
-        stack.push(child);
-      }
-    }
-  }
-  return false;
-}
-
-/** Whether the class has a `render()` returning an `html`/`svg` template. */
-function rendersLitTemplate(
-  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
-): boolean {
-  const body = findMethod(node, "render")?.value.body;
-  if (!body) return false;
-  return subtreeUsesTaggedTemplate(body, LIT_TEMPLATE_TAGS);
-}
-
-/** Whether the class has a static `styles` member built from `css`. */
-function hasCssStyles(
-  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
-): boolean {
-  for (const member of classMembers(node)) {
-    if (member.type === "PropertyDefinition") {
-      if (!member.static || keyName(member.key) !== "styles") continue;
-      if (member.value && subtreeUsesTaggedTemplate(member.value, ["css"])) {
-        return true;
-      }
-    } else if (member.type === "MethodDefinition" && member.kind === "get") {
-      if (!member.static || keyName(member.key) !== "styles") continue;
-      const body = member.value.body;
-      if (body && subtreeUsesTaggedTemplate(body, ["css"])) return true;
-    }
-  }
-  return false;
-}
-
-/** The base class declared in the same module, if `name` resolves there. */
-function baseClassInModule(
-  node: Deno.lint.Node,
-  name: string,
-): Deno.lint.ClassDeclaration | null {
-  let program: Deno.lint.Node | undefined = node;
-  while (program && program.type !== "Program") {
-    program = (program as { parent?: Deno.lint.Node }).parent;
-  }
-  if (!program || program.type !== "Program") return null;
-  for (const statement of program.body) {
-    const decl = statement.type === "ExportNamedDeclaration" &&
-        statement.declaration
-      ? statement.declaration
-      : statement;
-    if (decl.type === "ClassDeclaration" && decl.id?.name === name) return decl;
-  }
-  return null;
-}
-
-/**
- * Whether a class is a Lit component.
+ * Whether a class is a Lit component, from the scanner's facts.
  *
- * Four same-file signals, any one of which is enough: it extends a Lit base
- * (`LitElement`/`ReactiveElement`, following the superclass chain within the
- * module), carries `@customElement`, has a `render()` returning an `html`/`svg`
- * template, or declares `static styles` built from `css`. A base imported from
- * another module cannot be followed — there is no cross-file resolution — so a
- * component whose only Lit-ness lives in an off-file base with none of the other
- * signals present is not seen.
+ * The scanner follows the heritage chain across files with a real type checker,
+ * so this recognizes a component whose base lives in another module — which the
+ * AST cannot. With no facts, or facts whose hash no longer matches the file
+ * being linted, it reports `false` rather than guess.
  */
 export function isLitComponent(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
+  ctx: Deno.lint.RuleContext,
 ): boolean {
-  return isLitComponentChain(node, new Set());
+  if (node.id === null) {
+    return false;
+  }
+  return factsFor(ctx)?.components.includes(node.id.range[0]) ?? false;
 }
 
-function isLitComponentChain(
-  node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
-  seen: Set<Deno.lint.Node>,
-): boolean {
-  if (seen.has(node)) return false;
-  seen.add(node);
-
-  const superClass = node.superClass;
-  if (superClass) {
-    const path = memberPath(superClass);
-    const base = path === null ? null : (path.split(".").pop() ?? path);
-    if (base !== null) {
-      if (LIT_BASES.includes(base)) return true;
-      const decl = baseClassInModule(node, base);
-      if (decl && isLitComponentChain(decl, seen)) return true;
-    }
+/** Fresh scanner facts for the file being linted. */
+function factsFor(ctx: Deno.lint.RuleContext): FileFacts | null {
+  const facts = scanFacts();
+  if (facts === null) {
+    return null;
   }
-
-  if (findDecorator(classDecorators(node), "customElement") !== null) {
-    return true;
+  const fileFacts = facts.cache.files[fileKey(facts.root, ctx.filename)];
+  if (
+    fileFacts === undefined ||
+    fileFacts.hash !== hashText(ctx.sourceCode.text)
+  ) {
+    return null;
   }
-  if (rendersLitTemplate(node)) return true;
-  return hasCssStyles(node);
+  return fileFacts;
 }
 
 /** Whether a class declares `implements ReactiveController`. */
@@ -305,26 +183,29 @@ export function controllerHostField(
 /** Whether a tagged template uses the given tag name (`html` or `css`). */
 export function isTaggedWith(
   node: Deno.lint.TaggedTemplateExpression,
-  tag: string,
+  tag: LitTemplateKind,
+  ctx: Deno.lint.RuleContext,
 ): boolean {
-  const path = memberPath(node.tag);
-  if (path === null) return false;
-  // Accept `html`, and `svg`/`mathml` style siblings only when asked for.
-  return path === tag;
+  return factsFor(ctx)?.templates.some((template) =>
+    template.kind === tag && template.start === node.tag.range[0]
+  ) ?? false;
 }
 
 /** Whether a tagged template is an `html` template. */
 export function isHtmlTemplate(
   node: Deno.lint.TaggedTemplateExpression,
+  ctx: Deno.lint.RuleContext,
 ): boolean {
-  return isTaggedWith(node, "html") || isTaggedWith(node, "svg");
+  return isTaggedWith(node, "html", ctx) ||
+    isTaggedWith(node, "svg", ctx);
 }
 
 /** Whether a tagged template is a `css` template. */
 export function isCssTemplate(
   node: Deno.lint.TaggedTemplateExpression,
+  ctx: Deno.lint.RuleContext,
 ): boolean {
-  return isTaggedWith(node, "css");
+  return isTaggedWith(node, "css", ctx);
 }
 
 /** The custom element tag registered by `@customElement("x-y")`, if any. */

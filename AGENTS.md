@@ -14,6 +14,18 @@ Keep responses short. State the decision and what changed — no restating
 rationale already written here, no summarizing edits the user can read. Detail
 belongs in this file, not in chat.
 
+Move fast: delegate mechanical sweeps to subagents in parallel, batch edits, and
+stop re-opening settled decisions.
+
+## Agent memory and skills
+
+Durable decisions and in-progress work live in `.agents/memory/*.md`; repeatable
+procedures live in `.agents/skills/*/SKILL.md`. Read `.agents/memory/README.md`
+and any relevant skill before starting. Keep them current: after a decision, an
+architectural change, or work another agent must continue, add or edit a memory
+file; turn anything you repeat into a skill; delete what becomes wrong. One fact
+per memory file.
+
 ## Project conventions
 
 - `deno.json` is the only config. Strict TS.
@@ -24,7 +36,7 @@ belongs in this file, not in chat.
 - `deno fmt`, `deno check`, and `deno lint` must all pass on this package
   itself.
 - Every rule has tests. Use `Deno.lint.runPlugin`, which is only available under
-  `deno test`.
+  `deno test`. Run them as `deno test -A` — see "Scanner".
 - Annotate the plugin as `Deno.lint.Plugin` — visitor callback params infer from
   it, and JSR's slow-types check needs the explicit public type.
 - `license` must be set in `deno.json` (or a LICENSE file present) or
@@ -35,7 +47,10 @@ belongs in this file, not in chat.
   _type_ keyword only: the runtime operator (`typeof x === "string"`) is fine
   and is used throughout the rules.
 
-### Packaging: why there are five entry points
+### Packaging: five plugins
+
+The scanner is an internal implementation detail, not a public export. The five
+subpaths are all lint plugins.
 
 Deno's plugin API is `{ name, rules }` — **no tags, no presets, and no per-rule
 options** (`RuleContext` has no `options`). Verified: `deno.json`
@@ -87,6 +102,38 @@ rules individually alongside its `*Rules` record, so composing a custom
 `lint.ts` works by importing from the specific subpaths. Do not add one back —
 if `.` were also a plugin, a user loading both `.` and `./core` would get every
 diagnostic twice.
+
+### Scanner
+
+Cross-file and type facts are built once at plugin load, because a lint rule is
+synchronous and cannot build a TypeScript program. Four aliases, layered:
+
+- `#build` — top-level await at plugin load, imported for its side effect by
+  each plugin barrel. Builds the program and hands the facts to `#scan-index`.
+  Reaches `#scanner` through a dynamic import.
+- `#scanner` — `createDenoProgram` (a `@deno/loader` host: import maps,
+  workspaces, `npm:`/`jsr:`/`https:`, no `node_modules` needed) plus the
+  checker-based fact builders.
+- `#scan-index` — the store: `ScanCache`, `setScanFacts`, `scanFacts`,
+  `fileKey`, `hashText`. Lowest layer, no TypeScript import.
+- `#helpers` — reads the facts; accurate-or-silent.
+
+**The facts live in a module variable, never on disk.** Verified: `deno lint`
+runs every rule in the isolate that loaded the plugin, so one TLA build reaches
+all of them even though files are processed in parallel. A lint run must not
+write into the project it is linting — an earlier disk cache
+(`.lit-scan-cache.json`) did, and is gone. The per-file hash stays, because an
+editor can lint a buffer that no longer matches what the scan read.
+
+Facts are as fresh as the last plugin load; refreshing means Restart Deno
+Server, the same model as Deno's own LSP. Rejected alternatives and the
+reasoning are in `.agents/memory/scanner-architecture.md` — read it before
+changing any of this.
+
+Tests run `deno test -A`. They import the public barrels, so the real scanner
+build runs in each test isolate before the harness injects snippet-specific
+facts through `setScanFacts`. `-A` is required because both paths read the
+module graph.
 
 ### Per-rule docs
 
@@ -146,23 +193,17 @@ Checked empirically against Deno 2.9.3 — do not re-litigate:
 - `:exit` visitors (`"MethodDefinition:exit"`) work. Use them to collect facts
   during a subtree walk and decide on exit — `lifecycle-super` needs this to
   accept a `super.x()` call nested inside `if`/`try`.
-- There is **no cross-file resolution**. A rule that needs the superclass chain
-  can only scan `Program.body` of the same module. A base class imported from
-  elsewhere is unanalyzable — a real limitation to document per rule, not a bug.
-- **`isLitComponent` detects by same-file facts, any one of four.** It extends
-  `LitElement`/`ReactiveElement` (following the superclass chain within the
-  module), carries `@customElement`, has a `render()` returning an `html`/`svg`
-  template, or declares `static styles` built from `css`. It is intentionally
-  _not_ `extends LitElement` alone: cross-file and cross-library bases are
-  common, so a name-only base check silently skips real components. `render()`
-  the _name_ and `extends HTMLElement` were rejected — the first is a method
-  name any framework uses, the second means the class is a plain element, not a
-  Lit one. The residual miss is a class whose only Lit-ness is an off-file base
-  with none of the four local signals. `no-manual-update` needs no help from
-  this: a `this.requestUpdate()` receiver only exists on a `ReactiveElement`, so
-  the call itself is the signal — but it still gates on `isLitComponent`, so an
-  off-file base with no local signal is the shared limitation, not a
-  rule-specific one.
+- The **lint AST has no cross-file resolution**. A rule that needs the
+  superclass chain or a registration site cannot get it from `Program.body`
+  alone. That is what the scanner exists for — see "Scanner" below; a rule must
+  not re-add a same-module heuristic to work around it.
+- **`isLitComponent(node, ctx)` reads scanner facts, never the AST.** It looks
+  the class name's source offset up in the facts for `ctx.filename` and returns
+  `false` when there are none or the file hash no longer matches — accurate or
+  silent, never a guess. The old four-signal AST heuristic (`extends LitElement`
+  / `@customElement` / `render()` returning `html` / `static styles` from `css`)
+  is deleted; do not reintroduce it. `no-manual-update` is gated on it too, even
+  though `this.requestUpdate()` alone implies a `ReactiveElement`.
 - **Import-map aliases are fine for shipping, but break path-loading.** Internal
   imports use `#helpers` (mapped in `deno.json`). `deno publish` rewrites
   specifiers to fully-qualified ones at publish time, so consumers installing
@@ -170,8 +211,10 @@ Checked empirically against Deno 2.9.3 — do not re-litigate:
   path** never reads this package's `deno.json` and fails with
   `Import "#helpers" not a dependency`. That is a limitation of path-loading,
   not of the package — see the integration-testing note below.
-- Third-party imports must still be fully-specified `npm:` / `jsr:`. A bare
-  `parse5` alias resolves against the _consumer's_ import map and fails there.
+- **Bare third-party aliases are fine too.** `deno.json` maps `parse5` and
+  `typescript`; `helpers/template.ts` and all of `src/scanner/` import through
+  them. `deno publish` rewrites these to fully-qualified specifiers the same way
+  it rewrites `#helpers`, so a consumer's own import map never enters into it.
 - Template location mapping needs care: a placeholder (`{{__lit_0__}}`) and the
   binding it stands for (`${this.tag}`) have different lengths, so offsets
   inside a placeholder cannot be mapped linearly — they snap to the whole `${…}`
@@ -226,10 +269,9 @@ survive untouched.
 Unit tests use `Deno.lint.runPlugin`; that is not the deployment path. Before
 release, also run real `deno lint` from a _separate_ consumer project against
 both a deliberately-bad file and a known-good component. That check is what
-caught two real bugs the 313 unit tests missed: bare `parse5` imports failing to
-resolve against a consumer's import map, and false positives on idiomatic code
-(`AbortController` tripping `no-controller-references`, `willUpdate` tripping
-`lifecycle-super`).
+caught false positives on idiomatic code the 313 unit tests missed —
+`AbortController` tripping `no-controller-references`, `willUpdate` tripping
+`lifecycle-super`.
 
 Since internal imports use the `#helpers` alias, the consumer project **cannot**
 point at `src/**/mod.ts` by file path — it must consume the package the way real

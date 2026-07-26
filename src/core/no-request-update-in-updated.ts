@@ -41,7 +41,7 @@ export const noRequestUpdateInUpdated: Deno.lint.Rule = {
         const hook = enclosingPostUpdateHook(node);
         if (hook === null) return;
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         ctx.report({
           node,
           message: `requestUpdate() is called inside ${hook}().`,

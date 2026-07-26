@@ -7,12 +7,8 @@
  * index so offsets stay easy to map back.
  */
 
-// Fully-specified `npm:` specifier rather than a bare `parse5` alias: a lint
-// plugin is resolved against the CONSUMER's import map, which has no entry for
-// it. A bare specifier fails with "Import \"parse5\" not a dependency" the
-// moment anyone loads this plugin from another project.
-import { parseFragment } from "npm:parse5@^8.0.1";
-import type { DefaultTreeAdapterMap } from "npm:parse5@^8.0.1";
+import { parseFragment } from "parse5";
+import type { DefaultTreeAdapterMap } from "parse5";
 
 export type ParsedElement = DefaultTreeAdapterMap["element"];
 export type ParsedNode = DefaultTreeAdapterMap["node"];

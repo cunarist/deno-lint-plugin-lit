@@ -47,7 +47,7 @@ export const noThisInStaticStyles: Deno.lint.Rule = {
       ThisExpression(node) {
         if (!inStaticStylesInitializer(node)) return;
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         ctx.report({
           node,
           message: "`this` is used inside static styles.",

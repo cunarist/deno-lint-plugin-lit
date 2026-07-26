@@ -71,7 +71,7 @@ export const noPropertyChangeUpdate: Deno.lint.Rule = {
     function check(node: Deno.lint.Node, target: Deno.lint.Node): void {
       if (!isInsideMethod(node, "update")) return;
       const classNode = enclosingClass(node);
-      if (!classNode || !isLitComponent(classNode)) return;
+      if (!classNode || !isLitComponent(classNode, ctx)) return;
       const name = thisPropertyName(target);
       if (name === null) return;
       if (!reactivePropertyNames(classNode).has(name)) return;

@@ -50,7 +50,7 @@ export const requireTagPrefix: Deno.lint.Rule = {
     function check(
       node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
     ): void {
-      if (!isLitComponent(node)) return;
+      if (!isLitComponent(node, ctx)) return;
       const tag = customElementTag(node);
       const id = node.id;
       if (tag === null || !id) return;

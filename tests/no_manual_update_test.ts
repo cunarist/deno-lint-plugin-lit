@@ -53,23 +53,22 @@ Deno.test("no-manual-update: ignores code outside a component", () => {
   assertValid(plugin, "class Store { go() { this.requestUpdate(); } }");
 });
 
-Deno.test("no-manual-update: detects the component by any Lit signal", () => {
-  // @customElement
-  assertInvalid(
+Deno.test("no-manual-update: does not guess from Lit-like AST signals", () => {
+  assertValid(
     plugin,
     '@customElement("x-el") class El { go() { this.requestUpdate(); } }',
   );
-  // render() returning an html template
-  assertInvalid(
+  assertValid(
     plugin,
     "class El { render() { return html`<b></b>`; } go() { this.requestUpdate(); } }",
   );
-  // static styles built from css
-  assertInvalid(
+  assertValid(
     plugin,
     "class El { static styles = css`:host{}`; go() { this.requestUpdate(); } }",
   );
-  // a same-file base that extends a Lit base
+});
+
+Deno.test("no-manual-update: follows a Lit base in the checker", () => {
   assertInvalid(
     plugin,
     `class Base extends LitElement {}
@@ -77,9 +76,7 @@ Deno.test("no-manual-update: detects the component by any Lit signal", () => {
   );
 });
 
-Deno.test("no-manual-update: cannot see an off-file base with no local signal", () => {
-  // The base is imported, and nothing local marks the class as Lit. There is no
-  // cross-file resolution, so this is an accepted miss.
+Deno.test("no-manual-update: stays silent for an unresolved base", () => {
   assertValid(
     plugin,
     "class El extends ImportedBase { go() { this.requestUpdate(); } }",

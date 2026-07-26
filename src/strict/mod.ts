@@ -4,6 +4,8 @@
  * @module
  */
 
+import "#build";
+
 import { directiveAllowlist } from "./directive-allowlist.ts";
 import { noBooleanPropertyDefaultTrue } from "./no-boolean-property-default-true.ts";
 import { noEventTargetSubclass } from "./no-event-target-subclass.ts";

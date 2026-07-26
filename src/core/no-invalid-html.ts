@@ -10,8 +10,8 @@
  * neither void nor self-closing, was never closed.
  */
 
-import { parseFragment } from "npm:parse5@^8.0.1";
-import type { ParserError } from "npm:parse5@^8.0.1";
+import { parseFragment } from "parse5";
+import type { ParserError } from "parse5";
 
 import { isElement, isHtmlTemplate, templateSource } from "#helpers";
 import type { ParsedElement, ParsedNode } from "#helpers";
@@ -107,7 +107,7 @@ export const noInvalidHtml: Deno.lint.Rule = {
   create(ctx) {
     return {
       TaggedTemplateExpression(node) {
-        if (!isHtmlTemplate(node)) return;
+        if (!isHtmlTemplate(node, ctx)) return;
         const source = templateSource(node);
 
         const errors: ParserError[] = [];

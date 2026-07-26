@@ -4,6 +4,8 @@
  * @module
  */
 
+import "#build";
+
 import { noDomQuery } from "./no-dom-query.ts";
 import { noQueryDecorators } from "./no-query-decorators.ts";
 import { preferCreateRef } from "./prefer-create-ref.ts";

@@ -36,7 +36,7 @@ export const noAsyncLifecycle: Deno.lint.Rule = {
         if (name === null || !SYNC_LIFECYCLE.includes(name)) return;
         if (!node.value.async) return;
         const classNode = enclosingClass(node);
-        if (!classNode || !isLitComponent(classNode)) return;
+        if (!classNode || !isLitComponent(classNode, ctx)) return;
         ctx.report({
           node: node.key,
           message: `${name}() is async.`,

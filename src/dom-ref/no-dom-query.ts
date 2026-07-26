@@ -11,9 +11,12 @@ import { enclosingClass, isLitComponent } from "#helpers";
 const QUERY_METHODS: readonly string[] = ["querySelector", "querySelectorAll"];
 
 /** Whether the node sits inside a Lit component class body. */
-function inLitComponent(node: Deno.lint.Node): boolean {
+function inLitComponent(
+  node: Deno.lint.Node,
+  ctx: Deno.lint.RuleContext,
+): boolean {
   const owner = enclosingClass(node);
-  return owner !== null && isLitComponent(owner);
+  return owner !== null && isLitComponent(owner, ctx);
 }
 
 /**
@@ -28,7 +31,7 @@ export const noDomQuery: Deno.lint.Rule = {
         const property = callee.property;
         if (property.type !== "Identifier") return;
         if (!QUERY_METHODS.includes(property.name)) return;
-        if (!inLitComponent(node)) return;
+        if (!inLitComponent(node, ctx)) return;
         ctx.report({
           node: callee,
           message: `DOM lookup via \`${property.name}\`.`,

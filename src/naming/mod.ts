@@ -4,6 +4,8 @@
  * @module
  */
 
+import "#build";
+
 import { attributeNames } from "./attribute-names.ts";
 import { eventNameCase } from "./event-name-case.ts";
 import { noCamelcaseAttribute } from "./no-camelcase-attribute.ts";
