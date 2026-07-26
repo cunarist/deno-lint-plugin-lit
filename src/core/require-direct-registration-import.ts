@@ -1,12 +1,12 @@
 /**
  * `require-direct-registration-import`
  *
- * A custom element used in a template whose registering module this file cannot
- * reach through runtime imports. The element still renders as long as some
- * other module ran its `customElements.define`, so the tag works today by
- * borrowing another file's import — until that unrelated import is removed and
- * this template silently breaks. Importing the registering module, or a module
- * that imports it, keeps the usage self-sufficient.
+ * A custom element used in a template whose registering module this file does
+ * not import, directly or through that module's own `mod.ts`. The element still
+ * renders as long as some other module ran its `customElements.define`, so the
+ * tag works today by borrowing another file's import — until that unrelated
+ * import is removed and this template silently breaks. Importing the
+ * registering module here keeps the usage self-sufficient.
  *
  * This rule reads facts a synchronous rule cannot compute — which module
  * registers a tag, and which modules this file truly imports — from the cache
@@ -37,7 +37,7 @@ function startTagSpan(
 }
 
 /**
- * Rejects a template tag whose registering module the file cannot reach.
+ * Rejects a template tag whose registering module the file does not import.
  */
 export const requireDirectRegistrationImport: Deno.lint.Rule = {
   create(ctx) {

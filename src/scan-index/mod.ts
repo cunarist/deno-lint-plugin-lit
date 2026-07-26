@@ -37,7 +37,7 @@ export interface FileFacts {
   readonly components: readonly number[];
   /** Lit tagged templates in this file. */
   readonly templates: readonly LitTemplateFact[];
-  /** Files this file reaches through runtime imports, relative to the root. */
+  /** Files this file runs through an import, relative to the root. */
   readonly imports: readonly string[];
 }
 

@@ -22,15 +22,29 @@ Deno.test("scanner facts: records direct runtime imports", async () => {
   ]);
 });
 
-Deno.test("scanner facts: follows transitive runtime imports", async () => {
+Deno.test("scanner facts: follows an imported `mod.ts` within its folder", async () => {
+  const source = fixture("uses-mod.ts");
+  const { program } = await createDenoProgram([source], config);
+  const cache = buildCache(program, [source], root);
+  assertEquals(cache.files["uses-mod.ts"]?.imports, [
+    "widgets/mod.ts",
+    "widgets/nested/mod.ts",
+    "widgets/element-e.ts",
+    "widgets/nested/element-f.ts",
+  ]);
+  assertEquals(cache.registrations["cl-e"], "widgets/element-e.ts");
+  assertEquals(cache.registrations["cl-f"], "widgets/nested/element-f.ts");
+  // `#outside` sits outside the folder `widgets/mod.ts` stands for, and
+  // `./element-g.ts` is re-exported type-only, so neither is reached.
+  assertEquals(cache.registrations["cl-a"], "element-a.ts");
+  assertEquals(cache.registrations["cl-g"], "widgets/element-g.ts");
+});
+
+Deno.test("scanner facts: does not follow a barrel that is not `mod.ts`", async () => {
   const source = fixture("indirect.ts");
   const { program } = await createDenoProgram([source], config);
   const cache = buildCache(program, [source], root);
-  assertEquals(cache.files["indirect.ts"]?.imports, [
-    "register-elements.ts",
-    "registration-entry.ts",
-    "element-b.ts",
-  ]);
+  assertEquals(cache.files["indirect.ts"]?.imports, ["register-elements.ts"]);
   assertEquals(cache.registrations["cl-b"], "element-b.ts");
 });
 
@@ -40,16 +54,6 @@ Deno.test("scanner facts: excludes type-only imports", async () => {
   const { program } = await createDenoProgram([element, source], config);
   const cache = buildCache(program, [element, source], root);
   assertEquals(cache.files["type-only.ts"]?.imports, []);
-  assertEquals(cache.registrations["cl-d"], "element-d.ts");
-});
-
-Deno.test("scanner facts: does not follow transitive type-only exports", async () => {
-  const source = fixture("indirect-type-only.ts");
-  const { program } = await createDenoProgram([source], config);
-  const cache = buildCache(program, [source], root);
-  assertEquals(cache.files["indirect-type-only.ts"]?.imports, [
-    "element-types.ts",
-  ]);
   assertEquals(cache.registrations["cl-d"], "element-d.ts");
 });
 

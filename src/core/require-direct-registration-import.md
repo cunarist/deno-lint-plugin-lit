@@ -1,7 +1,7 @@
 # require-direct-registration-import
 
 Rejects a custom element used in a template whose registering module the file
-cannot reach through its runtime imports.
+does not import, directly or through that module's own `mod.ts`.
 
 ## Why
 
@@ -10,8 +10,7 @@ A custom element renders as long as some module has run its
 different file is what imported and registered it. The tag works today by
 borrowing that other import, and the day it is removed for an unrelated reason,
 this template silently renders an unknown element. Importing the registering
-module, or a module that imports it, makes the usage carry its own reason to
-work.
+module here makes the usage carry its own reason to work.
 
 ## Examples
 
@@ -27,9 +26,9 @@ export class Panel extends LitElement {
 ```
 
 ```ts
-// GOOD - the registering module is reached through this import
+// GOOD - the registering module is imported here
 import { html, LitElement } from "lit";
-import "./register-elements.ts"; // imports "./cl-widget.ts"
+import "./cl-widget.ts";
 
 export class Panel extends LitElement {
   override render() {
@@ -49,6 +48,8 @@ export class Panel extends LitElement {
   both app elements and compiled dependencies are covered.
 - A type-only import (`import type …`) never runs its module, so it does not
   count as importing the registration.
-- Runtime imports and re-exports are followed transitively, including through
-  barrel modules.
+- A `mod.ts` stands for the folder it sits in, so importing `./widgets/mod.ts`
+  also counts for anything under `./widgets/` that it runs. Any other barrel
+  does not — it can pull a module in from anywhere, which is the borrowed import
+  this rule rejects.
 - An element registered in the same file needs no import and is not flagged.

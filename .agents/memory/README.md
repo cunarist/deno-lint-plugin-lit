@@ -15,4 +15,4 @@ One durable fact or decision per file. Read the relevant ones before working.
 - [scanner-symbol-identity.md](scanner-symbol-identity.md) — registration and
   component facts require checker identity and go silent when ambiguous.
 - [scanner-runtime-imports.md](scanner-runtime-imports.md) — registration
-  imports follow the transitive runtime module graph.
+  imports are direct, except through an imported `mod.ts`.

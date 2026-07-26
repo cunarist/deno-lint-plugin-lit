@@ -1,5 +1,7 @@
 {
-  "imports": {},
+  "imports": {
+    "#outside": "./element-a.ts"
+  },
   "compilerOptions": {
     "lib": ["dom", "esnext"]
   }

@@ -1,4 +1,4 @@
-import "./element-types.ts";
+import "./widgets/mod.ts";
 
 const html = (strings: TemplateStringsArray): TemplateStringsArray => strings;
-export const view = html`<cl-d></cl-d>`;
+export const view = html`<cl-e></cl-e>`;
