@@ -1,17 +1,24 @@
 import ts from "typescript";
 
-/** The files a source runs through a direct import or re-export. */
-export function directlyImportedFiles(
+/** The files a source runs through runtime imports and re-exports. */
+export function runtimeImportedFiles(
   source: ts.SourceFile,
   checker: ts.TypeChecker,
 ): Set<string> {
   const files = new Set<string>();
-  for (const statement of source.statements) {
-    const specifier = runtimeSpecifier(statement);
-    if (specifier !== null) {
-      const file = moduleFile(specifier, checker);
-      if (file !== null) {
-        files.add(file);
+  const visited = new Set([source.fileName]);
+  const pending = [source];
+  for (let index = 0; index < pending.length; index += 1) {
+    const current = pending[index];
+    if (current === undefined) continue;
+    for (const statement of current.statements) {
+      const specifier = runtimeSpecifier(statement);
+      if (specifier === null) continue;
+      const imported = moduleSource(specifier, checker);
+      if (imported !== null && !visited.has(imported.fileName)) {
+        visited.add(imported.fileName);
+        files.add(imported.fileName);
+        pending.push(imported);
       }
     }
   }
@@ -24,7 +31,7 @@ export function directlyImportedFiles(
 function runtimeSpecifier(statement: ts.Statement): ts.StringLiteral | null {
   const specifier = ts.isImportDeclaration(statement)
     ? runsImport(statement) ? statement.moduleSpecifier : undefined
-    : ts.isExportDeclaration(statement) && !statement.isTypeOnly
+    : ts.isExportDeclaration(statement) && runsExport(statement)
     ? statement.moduleSpecifier
     : undefined;
   return specifier !== undefined && ts.isStringLiteral(specifier)
@@ -52,14 +59,23 @@ function runsImport(statement: ts.ImportDeclaration): boolean {
     bindings.elements.some((element) => !element.isTypeOnly);
 }
 
-/** The resolved file a module specifier points at. */
-function moduleFile(
+/** Whether a re-export executes its module rather than being fully erased. */
+function runsExport(statement: ts.ExportDeclaration): boolean {
+  if (statement.isTypeOnly) return false;
+  const clause = statement.exportClause;
+  return clause === undefined || ts.isNamespaceExport(clause) ||
+    clause.elements.length === 0 ||
+    clause.elements.some((element) => !element.isTypeOnly);
+}
+
+/** The resolved source a module specifier points at. */
+function moduleSource(
   specifier: ts.StringLiteral,
   checker: ts.TypeChecker,
-): string | null {
+): ts.SourceFile | null {
   const symbol = checker.getSymbolAtLocation(specifier);
   const declaration = symbol?.getDeclarations()?.[0];
   return declaration !== undefined && ts.isSourceFile(declaration)
-    ? declaration.fileName
+    ? declaration
     : null;
 }

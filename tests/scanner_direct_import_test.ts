@@ -22,12 +22,34 @@ Deno.test("scanner facts: records direct runtime imports", async () => {
   ]);
 });
 
+Deno.test("scanner facts: follows transitive runtime imports", async () => {
+  const source = fixture("indirect.ts");
+  const { program } = await createDenoProgram([source], config);
+  const cache = buildCache(program, [source], root);
+  assertEquals(cache.files["indirect.ts"]?.imports, [
+    "register-elements.ts",
+    "registration-entry.ts",
+    "element-b.ts",
+  ]);
+  assertEquals(cache.registrations["cl-b"], "element-b.ts");
+});
+
 Deno.test("scanner facts: excludes type-only imports", async () => {
   const element = fixture("element-d.ts");
   const source = fixture("type-only.ts");
   const { program } = await createDenoProgram([element, source], config);
   const cache = buildCache(program, [element, source], root);
   assertEquals(cache.files["type-only.ts"]?.imports, []);
+  assertEquals(cache.registrations["cl-d"], "element-d.ts");
+});
+
+Deno.test("scanner facts: does not follow transitive type-only exports", async () => {
+  const source = fixture("indirect-type-only.ts");
+  const { program } = await createDenoProgram([source], config);
+  const cache = buildCache(program, [source], root);
+  assertEquals(cache.files["indirect-type-only.ts"]?.imports, [
+    "element-types.ts",
+  ]);
   assertEquals(cache.registrations["cl-d"], "element-d.ts");
 });
 

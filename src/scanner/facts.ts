@@ -8,9 +8,9 @@ import {
   type ScanCache,
 } from "#scan-index";
 
-import { directlyImportedFiles } from "./direct-import.ts";
 import { isLitComponent, litTemplateKind } from "./lit.ts";
 import { collectRegistrations } from "./registration.ts";
+import { runtimeImportedFiles } from "./runtime-import.ts";
 
 /**
  * Turns a program into the fact cache the lint rules read.
@@ -63,7 +63,7 @@ export function fileFacts(
     hash: hashText(source.text),
     components: lit.components,
     templates: lit.templates,
-    imports: [...directlyImportedFiles(source, checker)].map((imported) =>
+    imports: [...runtimeImportedFiles(source, checker)].map((imported) =>
       toRoot(root, imported)
     ),
   };
