@@ -9,8 +9,8 @@
  *
  * This rule reads facts a synchronous rule cannot compute — which module
  * registers a tag, and which modules this file truly imports — from the cache
- * the background scanner writes. With no cache, or one whose hash no longer
- * matches this file, it stays silent rather than guess.
+ * the background scanner writes. With no cache at all it stays silent rather
+ * than guess.
  */
 
 import {
@@ -20,7 +20,7 @@ import {
   walkElements,
 } from "#helpers";
 import type { ParsedElement } from "#helpers";
-import { fileKey, hashText, scanFacts } from "#scan-index";
+import { currentFileFacts, fileKey, scanFacts } from "#scan-index";
 
 /** Whether a tag names a custom element rather than a built-in one. */
 function isCustomElement(tagName: string): boolean {
@@ -45,12 +45,8 @@ export const requireDirectRegistrationImport: Deno.lint.Rule = {
       return {};
     }
     const key = fileKey(facts.root, ctx.filename);
-    const fileFacts = facts.cache.files[key];
-    // Stay silent unless the cache was derived from this exact file content.
-    if (
-      fileFacts === undefined ||
-      fileFacts.hash !== hashText(ctx.sourceCode.text)
-    ) {
+    const fileFacts = currentFileFacts(ctx.filename, ctx.sourceCode.text);
+    if (fileFacts === null) {
       return {};
     }
     const imported = new Set(fileFacts.imports);

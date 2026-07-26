@@ -23,7 +23,7 @@ await scan().catch(() => {});
 
 /** Builds the program for the current project and publishes its facts. */
 async function scan(): Promise<void> {
-  const { buildCache, createDenoProgram } = await import("#scanner");
+  const { buildCache, createDenoProgram, fileFacts } = await import("#scanner");
   const root = Deno.cwd();
   const json = join(root, "deno.json");
   const config = await exists(json, { isFile: true })
@@ -39,6 +39,13 @@ async function scan(): Promise<void> {
       files.push(entry.path);
     }
   }
-  const program = await createDenoProgram(files, config);
-  setScanFacts({ root, cache: buildCache(program, files, root) });
+  const built = await createDenoProgram(files, config);
+  setScanFacts({
+    root,
+    cache: buildCache(built.program, files, root),
+    refresh: (filename, text) => {
+      const program = built.rebuild(filename, text);
+      return program === null ? null : fileFacts(program, filename, root);
+    },
+  });
 }

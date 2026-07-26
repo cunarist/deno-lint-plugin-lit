@@ -79,7 +79,7 @@ async function warmUp(): Promise<Warm> {
       probePath,
       `${LIT_IMPORTS}export class Probe extends LitElement {}\n`,
     );
-    const program = await createDenoProgram([probePath], configPath);
+    const { program } = await createDenoProgram([probePath], configPath);
     const probeFile = program.getSourceFile(probePath)?.fileName ?? probePath;
     const resolver = program as unknown as ResolverProgram;
     const edges = new Map<string, string>();

@@ -39,7 +39,7 @@ css\`:host {}\`;
 }
 `;
     await Deno.writeTextFile(source, sourceText);
-    const program = await createDenoProgram([source], config);
+    const { program } = await createDenoProgram([source], config);
     const cache = buildCache(program, [source], root);
     assertEquals(cache.files["components.ts"]?.components, [
       sourceText.indexOf("LitPanel", sourceText.indexOf("class LitPanel")),

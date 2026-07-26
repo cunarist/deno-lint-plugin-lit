@@ -122,13 +122,20 @@ synchronous and cannot build a TypeScript program. Four aliases, layered:
 runs every rule in the isolate that loaded the plugin, so one TLA build reaches
 all of them even though files are processed in parallel. A lint run must not
 write into the project it is linting — an earlier disk cache
-(`.lit-scan-cache.json`) did, and is gone. The per-file hash stays, because an
-editor can lint a buffer that no longer matches what the scan read.
+(`.lit-scan-cache.json`) did, and is gone.
 
-Facts are as fresh as the last plugin load; refreshing means Restart Deno
-Server, the same model as Deno's own LSP. Rejected alternatives and the
-reasoning are in `.agents/memory/scanner-architecture.md` — read it before
-changing any of this.
+Facts are keyed by **source offset**, so any edit above them shifts every
+offset; each file's facts carry a content hash to detect that. On a mismatch the
+facts for that one file are **rebuilt** — the loader, host, and program stay
+alive, and `rebuild(path, text)` swaps that file's `SourceFile` and passes the
+previous program as `oldProgram`. Every unchanged file is handed back as the
+identical object, so only the edited file is parsed: ~250ms to build, ~3ms to
+rebuild. Rules read through `currentFileFacts` in `#scan-index`, which memoizes
+a rebuild per file and hash so it happens once, not once per rule. Never call
+`buildCache` on a rebuild — it walks the whole project with a cold checker,
+which is the cost the rebuild exists to avoid. Restart Deno Server still picks
+up other files' changes. Rejected alternatives and the reasoning are in
+`.agents/memory/scanner-architecture.md` — read it before changing any of this.
 
 Tests run `deno test -A`. They import the public barrels, so the real scanner
 build runs in each test isolate before the harness injects snippet-specific
@@ -198,12 +205,13 @@ Checked empirically against Deno 2.9.3 — do not re-litigate:
   alone. That is what the scanner exists for — see "Scanner" below; a rule must
   not re-add a same-module heuristic to work around it.
 - **`isLitComponent(node, ctx)` reads scanner facts, never the AST.** It looks
-  the class name's source offset up in the facts for `ctx.filename` and returns
-  `false` when there are none or the file hash no longer matches — accurate or
-  silent, never a guess. The old four-signal AST heuristic (`extends LitElement`
-  / `@customElement` / `render()` returning `html` / `static styles` from `css`)
-  is deleted; do not reintroduce it. `no-manual-update` is gated on it too, even
-  though `this.requestUpdate()` alone implies a `ReactiveElement`.
+  the class name's source offset up in the facts for `ctx.filename`, rebuilding
+  them first when the file has changed, and returns `false` when there are none
+  — accurate or silent, never a guess. The old four-signal AST heuristic
+  (`extends LitElement` / `@customElement` / `render()` returning `html` /
+  `static styles` from `css`) is deleted; do not reintroduce it.
+  `no-manual-update` is gated on it too, even though `this.requestUpdate()`
+  alone implies a `ReactiveElement`.
 - **Import-map aliases are fine for shipping, but break path-loading.** Internal
   imports use `#helpers` (mapped in `deno.json`). `deno publish` rewrites
   specifiers to fully-qualified ones at publish time, so consumers installing

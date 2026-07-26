@@ -36,25 +36,95 @@ const OPTIONS: ts.CompilerOptions = {
   allowImportingTsExtensions: true,
 };
 
+/** A program kept alive so one changed file can be rebuilt against it. */
+export interface DenoProgram {
+  /** The program as it stands, from the scan or the last rebuild. */
+  readonly program: ts.Program;
+  /**
+   * Rebuilds with one file's text replaced, or null when it cannot.
+   *
+   * Every unchanged file is handed back to TypeScript as the same `SourceFile`
+   * object, which is what lets it reuse the old program instead of parsing the
+   * project again; only the replaced file is parsed. A specifier the loader
+   * never warmed — an import added since the scan — resolves to nothing, since
+   * warming it would need an await; the rest of the file's facts are still
+   * right. Null means the program never had the file at all.
+   */
+  rebuild(path: string, text: string): ts.Program | null;
+}
+
 /** Builds a program over the given files, resolving modules through Deno. */
 export async function createDenoProgram(
   files: string[],
   configPath: string,
-): Promise<ts.Program> {
-  // `createProgram` resolves and reads every reachable module before it
-  // returns, so the loader and its native resources are done once it does and
-  // are released here rather than leaked for the process's life.
-  using workspace = new Workspace({ configPath: resolvePath(configPath) });
-  using loader = await workspace.createLoader();
+): Promise<DenoProgram> {
+  // The loader and its native resources are held for the isolate's life rather
+  // than released here, because a rebuild resolves through the same loader.
+  const workspace = new Workspace({ configPath: resolvePath(configPath) });
+  const loader = await workspace.createLoader();
   // Entrypoints let the loader build its npm and jsr graph up front, so the
   // per-import `resolveSync` the host calls needs no further await.
   await loader.addEntrypoints(files.map(fileUrl));
-  return ts.createProgram(files, OPTIONS, denoHost(loader));
+  const sources = new Map<string, ts.SourceFile>();
+  const host = denoHost(loader, sources);
+  let program = ts.createProgram(files, OPTIONS, host);
+  return {
+    get program(): ts.Program {
+      return program;
+    },
+    rebuild(path: string, text: string): ts.Program | null {
+      const previous = program.getSourceFile(path);
+      if (previous === undefined) {
+        return null;
+      }
+      const replaced = ts.createSourceFile(
+        previous.fileName,
+        text,
+        ts.ScriptTarget.ESNext,
+        true,
+      );
+      const restore = sources.get(sourceKey(previous.fileName));
+      sources.set(sourceKey(previous.fileName), replaced);
+      try {
+        program = ts.createProgram(files, OPTIONS, host, program);
+        return program;
+      } catch {
+        if (restore !== undefined) {
+          sources.set(sourceKey(previous.fileName), restore);
+        }
+        return null;
+      }
+    },
+  };
+}
+
+/** The key a source file is cached under, matching how the host is called. */
+function sourceKey(fileName: string): string {
+  const path = fileName.replaceAll("\\", "/");
+  return ts.sys.useCaseSensitiveFileNames ? path : path.toLowerCase();
 }
 
 /** A compiler host that answers module resolution through the loader first. */
-function denoHost(loader: Loader): ts.CompilerHost {
+function denoHost(
+  loader: Loader,
+  sources: Map<string, ts.SourceFile>,
+): ts.CompilerHost {
   const host = ts.createCompilerHost(OPTIONS, true);
+  // A rebuild reuses the old program only for files it is handed back as the
+  // very same object, so every parse is cached rather than repeated.
+  const readSource = host.getSourceFile.bind(host);
+  host.getSourceFile = (fileName, languageVersion, onError, shouldCreate) => {
+    const key = sourceKey(fileName);
+    const cached = sources.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const source = readSource(fileName, languageVersion, onError, shouldCreate);
+    if (source !== undefined) {
+      sources.set(key, source);
+    }
+    return source;
+  };
   host.resolveModuleNameLiterals = (
     literals,
     containingFile,

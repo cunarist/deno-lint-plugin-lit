@@ -1,11 +1,9 @@
 /** Lit-specific detection helpers. */
 
 import {
+  currentFileFacts,
   type FileFacts,
-  fileKey,
-  hashText,
   type LitTemplateKind,
-  scanFacts,
 } from "#scan-index";
 
 import {
@@ -57,8 +55,8 @@ export const REACTIVE_PROPERTY_DECORATORS: readonly string[] = [
  *
  * The scanner follows the heritage chain across files with a real type checker,
  * so this recognizes a component whose base lives in another module — which the
- * AST cannot. With no facts, or facts whose hash no longer matches the file
- * being linted, it reports `false` rather than guess.
+ * AST cannot. A file edited since the scan has its facts rebuilt; with no facts
+ * at all, it reports `false` rather than guess.
  */
 export function isLitComponent(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
@@ -72,18 +70,7 @@ export function isLitComponent(
 
 /** Fresh scanner facts for the file being linted. */
 function factsFor(ctx: Deno.lint.RuleContext): FileFacts | null {
-  const facts = scanFacts();
-  if (facts === null) {
-    return null;
-  }
-  const fileFacts = facts.cache.files[fileKey(facts.root, ctx.filename)];
-  if (
-    fileFacts === undefined ||
-    fileFacts.hash !== hashText(ctx.sourceCode.text)
-  ) {
-    return null;
-  }
-  return fileFacts;
+  return currentFileFacts(ctx.filename, ctx.sourceCode.text);
 }
 
 /** Whether a class declares `implements ReactiveController`. */

@@ -13,7 +13,7 @@ const root = dirname(config);
 Deno.test("scanner facts: records direct runtime imports", async () => {
   const bad = fixture("bad.ts");
   const good = fixture("good.ts");
-  const program = await createDenoProgram([bad, good], config);
+  const { program } = await createDenoProgram([bad, good], config);
   const cache = buildCache(program, [bad, good], root);
   assertEquals(cache.files["bad.ts"]?.imports, ["element-a.ts"]);
   assertEquals(cache.files["good.ts"]?.imports, [
@@ -25,7 +25,7 @@ Deno.test("scanner facts: records direct runtime imports", async () => {
 Deno.test("scanner facts: excludes type-only imports", async () => {
   const element = fixture("element-d.ts");
   const source = fixture("type-only.ts");
-  const program = await createDenoProgram([element, source], config);
+  const { program } = await createDenoProgram([element, source], config);
   const cache = buildCache(program, [element, source], root);
   assertEquals(cache.files["type-only.ts"]?.imports, []);
   assertEquals(cache.registrations["cl-d"], "element-d.ts");
@@ -34,7 +34,7 @@ Deno.test("scanner facts: excludes type-only imports", async () => {
 Deno.test("scanner facts: records define registrations", async () => {
   const element = fixture("element-c.ts");
   const source = fixture("uses-c.ts");
-  const program = await createDenoProgram([element, source], config);
+  const { program } = await createDenoProgram([element, source], config);
   const cache = buildCache(program, [element, source], root);
   assertEquals(cache.registrations["cl-c"], "element-c.ts");
 });
@@ -63,7 +63,7 @@ interface HTMLElementTagNameMap {
 }
 `,
     );
-    const program = await createDenoProgram([source], config);
+    const { program } = await createDenoProgram([source], config);
     const cache = buildCache(program, [source], root);
     assertEquals(cache.registrations, {});
   } finally {

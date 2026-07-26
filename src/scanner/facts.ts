@@ -1,7 +1,12 @@
 import { relative } from "@std/path";
 import ts from "typescript";
 
-import { hashText, type LitTemplateFact, type ScanCache } from "#scan-index";
+import {
+  type FileFacts,
+  hashText,
+  type LitTemplateFact,
+  type ScanCache,
+} from "#scan-index";
 
 import { directlyImportedFiles } from "./direct-import.ts";
 import { isLitComponent, litTemplateKind } from "./lit.ts";
@@ -28,20 +33,40 @@ export function buildCache(
   }
   const cache: ScanCache = { registrations, files: {} };
   for (const file of files) {
-    const source = program.getSourceFile(file);
-    if (source !== undefined) {
-      const lit = collectLitFacts(source, checker);
-      cache.files[toRoot(root, file)] = {
-        hash: hashText(source.text),
-        components: lit.components,
-        templates: lit.templates,
-        imports: [...directlyImportedFiles(source, checker)].map((imported) =>
-          toRoot(root, imported)
-        ),
-      };
+    const facts = fileFacts(program, file, root);
+    if (facts !== null) {
+      cache.files[toRoot(root, file)] = facts;
     }
   }
   return cache;
+}
+
+/**
+ * The facts for a single file, or null when the program does not have it.
+ *
+ * A rebuild recomputes only the file that changed. Calling `buildCache` again
+ * would walk every file with a checker that no longer has any of the previous
+ * one's inference cached, which is the whole cost the rebuild exists to avoid.
+ */
+export function fileFacts(
+  program: ts.Program,
+  file: string,
+  root: string,
+): FileFacts | null {
+  const source = program.getSourceFile(file);
+  if (source === undefined) {
+    return null;
+  }
+  const checker = program.getTypeChecker();
+  const lit = collectLitFacts(source, checker);
+  return {
+    hash: hashText(source.text),
+    components: lit.components,
+    templates: lit.templates,
+    imports: [...directlyImportedFiles(source, checker)].map((imported) =>
+      toRoot(root, imported)
+    ),
+  };
 }
 
 /** Lit classes and template tags declared in a source file. */
