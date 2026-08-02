@@ -1,6 +1,7 @@
 {
   "imports": {
-    "#outside": "./element-a.ts"
+    "#outside": "./element-a.ts",
+    "lit": "npm:lit@^3"
   },
   "compilerOptions": {
     "lib": ["dom", "esnext"]

@@ -1,10 +1,13 @@
 /** Lit-specific detection helpers. */
 
+import { tryGetTypeServices } from "@cunarist/typescript-deno-lint/types";
+import ts from "typescript";
+
 import {
-  currentFileFacts,
-  type FileFacts,
+  isLitComponent as classExtendsLitBase,
   type LitTemplateKind,
-} from "#scan-index";
+  litTemplateKind,
+} from "#scanner";
 
 import {
   classDecorators,
@@ -51,26 +54,21 @@ export const REACTIVE_PROPERTY_DECORATORS: readonly string[] = [
 ];
 
 /**
- * Whether a class is a Lit component, from the scanner's facts.
+ * Whether a class is a Lit component, asked of the type checker.
  *
- * The scanner follows the heritage chain across files with a real type checker,
- * so this recognizes a component whose base lives in another module — which the
- * AST cannot. A file edited since the scan has its facts rebuilt; with no facts
- * at all, it reports `false` rather than guess.
+ * The checker follows the heritage chain across files, so this recognizes a
+ * component whose base lives in another module — which the AST cannot. With no
+ * type information for the file it reports `false` rather than guess.
  */
 export function isLitComponent(
   node: Deno.lint.ClassDeclaration | Deno.lint.ClassExpression,
   ctx: Deno.lint.RuleContext,
 ): boolean {
-  if (node.id === null) {
-    return false;
-  }
-  return factsFor(ctx)?.components.includes(node.id.range[0]) ?? false;
-}
-
-/** Fresh scanner facts for the file being linted. */
-function factsFor(ctx: Deno.lint.RuleContext): FileFacts | null {
-  return currentFileFacts(ctx.filename, ctx.sourceCode.text);
+  const services = tryGetTypeServices(ctx);
+  if (services === null) return false;
+  const declaration = services.getTSNode(node);
+  return declaration !== undefined && ts.isClassLike(declaration) &&
+    classExtendsLitBase(services.checker, declaration);
 }
 
 /** Whether a class declares `implements ReactiveController`. */
@@ -167,15 +165,23 @@ export function controllerHostField(
   return null;
 }
 
-/** Whether a tagged template uses the given tag name (`html` or `css`). */
+/**
+ * Whether a tagged template uses the given Lit tag (`html`, `svg`, or `css`).
+ *
+ * The tag is resolved to the symbol it denotes and that symbol's declaring
+ * module checked, so a local function named `html` is not mistaken for Lit's.
+ */
 export function isTaggedWith(
   node: Deno.lint.TaggedTemplateExpression,
   tag: LitTemplateKind,
   ctx: Deno.lint.RuleContext,
 ): boolean {
-  return factsFor(ctx)?.templates.some((template) =>
-    template.kind === tag && template.start === node.tag.range[0]
-  ) ?? false;
+  const services = tryGetTypeServices(ctx);
+  if (services === null) return false;
+  const expression = services.getTSNode(node);
+  return expression !== undefined &&
+    ts.isTaggedTemplateExpression(expression) &&
+    litTemplateKind(services.checker, expression) === tag;
 }
 
 /** Whether a tagged template is an `html` template. */

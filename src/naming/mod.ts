@@ -4,7 +4,7 @@
  * @module
  */
 
-import "#build";
+import "@cunarist/typescript-deno-lint/types";
 
 import { attributeNames } from "./attribute-names.ts";
 import { eventNameCase } from "./event-name-case.ts";

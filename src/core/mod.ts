@@ -5,7 +5,7 @@
  * @module
  */
 
-import "#build";
+import "@cunarist/typescript-deno-lint/types";
 
 import { attributeValueEntities } from "./attribute-value-entities.ts";
 import { bindingPositions } from "./binding-positions.ts";

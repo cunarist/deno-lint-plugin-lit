@@ -5,7 +5,7 @@
  * @module
  */
 
-import "#build";
+import "@cunarist/typescript-deno-lint/types";
 
 import { hostConstructor } from "./host-constructor.ts";
 import { lifecycleAllowlist } from "./lifecycle-allowlist.ts";

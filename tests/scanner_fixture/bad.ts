@@ -1,6 +1,6 @@
-import "./element-a.ts";
+import { html } from "lit";
 
-const html = (strings: TemplateStringsArray): TemplateStringsArray => strings;
+import "./element-a.ts";
 export const view = html`
   <cl-a></cl-a>
   <cl-b></cl-b>

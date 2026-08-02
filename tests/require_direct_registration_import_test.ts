@@ -1,8 +1,18 @@
+import { createDenoProgram } from "@cunarist/typescript-deno-lint/program";
+import {
+  clearTestProgram,
+  useTestProgram,
+} from "@cunarist/typescript-deno-lint/testing";
 import { assertEquals } from "@std/assert";
+import { fromFileUrl } from "@std/path";
 
 import { requireDirectRegistrationImport } from "#core";
-import { hashText, type ScanCache, setScanFacts } from "#scan-index";
 
+/**
+ * This rule is the one place the whole program matters, so it is tested over a
+ * real fixture project rather than a snippet: `bad.ts` uses `<cl-b>` without
+ * importing the module that registers it, `good.ts` imports both.
+ */
 const plugin: Deno.lint.Plugin = {
   name: "lit",
   rules: {
@@ -10,61 +20,44 @@ const plugin: Deno.lint.Plugin = {
   },
 };
 
-const USES_WIDGET =
-  "const html = (s: TemplateStringsArray) => s;\nexport const v = html`<cl-widget></cl-widget>`;";
+const fixture = (name: string): string =>
+  fromFileUrl(new URL(`./scanner_fixture/${name}`, import.meta.url))
+    .replaceAll("\\", "/");
 
-/** Runs the rule over source seen as `bad.ts`, against injected facts. */
-function lintWith(cache: ScanCache): Deno.lint.Diagnostic[] {
-  setScanFacts({ root: Deno.cwd(), cache });
+const config = fixture("deno.json");
+const bad = fixture("bad.ts");
+const good = fixture("good.ts");
+
+const { program } = await createDenoProgram([bad, good], config);
+
+/** Runs the rule over one fixture file, against the fixture's own program. */
+function lintFixture(file: string): Deno.lint.Diagnostic[] {
+  useTestProgram(program);
   try {
-    return Deno.lint.runPlugin(plugin, "bad.ts", USES_WIDGET);
+    return Deno.lint.runPlugin(plugin, file, Deno.readTextFileSync(file));
   } finally {
-    setScanFacts(null);
+    clearTestProgram();
   }
 }
 
-/** Facts placing `cl-widget` in `element.ts` and `bad.ts` importing `imports`. */
-function factsFor(imports: readonly string[]): ScanCache {
-  return {
-    registrations: { "cl-widget": "element.ts" },
-    files: {
-      "bad.ts": {
-        hash: hashText(USES_WIDGET),
-        components: [],
-        templates: [{ kind: "html", start: USES_WIDGET.indexOf("html`") }],
-        imports,
-      },
-    },
-  };
-}
-
 Deno.test("require-direct-registration-import: flags an unimported tag", () => {
-  const diagnostics = lintWith(factsFor([]));
+  const diagnostics = lintFixture(bad);
   assertEquals(diagnostics.length, 1);
   assertEquals(diagnostics[0]?.id, "lit/require-direct-registration-import");
+  assertEquals(
+    diagnostics[0]?.message,
+    "`<cl-b>` is used without importing the module that registers it.",
+  );
 });
 
 Deno.test("require-direct-registration-import: passes when imported", () => {
-  assertEquals(lintWith(factsFor(["element.ts"])), []);
+  assertEquals(lintFixture(good), []);
 });
 
-Deno.test("require-direct-registration-import: stays silent when the hash differs", () => {
-  // The facts' hash is from other content, so they must not be trusted.
-  const diagnostics = lintWith({
-    registrations: { "cl-widget": "element.ts" },
-    files: {
-      "bad.ts": {
-        hash: "stale",
-        components: [],
-        templates: [],
-        imports: [],
-      },
-    },
-  });
-  assertEquals(diagnostics, []);
-});
-
-Deno.test("require-direct-registration-import: does nothing with no facts", () => {
-  setScanFacts(null);
-  assertEquals(Deno.lint.runPlugin(plugin, "bad.ts", USES_WIDGET), []);
+Deno.test("require-direct-registration-import: does nothing without a program", () => {
+  clearTestProgram();
+  assertEquals(
+    Deno.lint.runPlugin(plugin, bad, Deno.readTextFileSync(bad)),
+    [],
+  );
 });

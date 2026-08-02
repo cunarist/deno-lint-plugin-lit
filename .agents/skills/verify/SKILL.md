@@ -15,11 +15,11 @@ That is `deno fmt --check && deno lint && deno check && deno test -A`.
 
 Key points:
 
-- Tests import the public plugin barrels, so `#build` runs in every test
-  isolate. This is intentionally not bypassed or disabled.
+- Tests import the public plugin barrels, so the program build runs in every
+  test isolate. This is intentionally not bypassed or disabled.
 - `deno lint` on this repo uses `jsr:@cunarist/deno-import-check`, not this
-  plugin itself — so linting the repo does **not** trigger the scan.
-- The scan writes nothing to disk. If any file appears in the repo root after a
+  plugin itself — so linting the repo does **not** build a program.
+- The build writes nothing to disk. If any file appears in the repo root after a
   lint or a test run, that is a bug — see the memory note.
 - Fix all fmt/lint/check/test problems before saying done. `deno task fix` runs
   `deno fmt && deno lint --fix`.

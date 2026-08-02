@@ -8,11 +8,14 @@
  * import is removed and this template silently breaks. Importing the
  * registering module here keeps the usage self-sufficient.
  *
- * This rule reads facts a synchronous rule cannot compute — which module
- * registers a tag, and which modules this file truly imports — from the cache
- * the background scanner writes. With no cache at all it stays silent rather
- * than guess.
+ * This rule reads two facts no single file can answer — which module registers a
+ * tag, and which modules this file truly runs — from a walk of the whole
+ * program, computed once and kept. Without type information it stays silent
+ * rather than guess.
  */
+
+import { tryGetTypeServices } from "@cunarist/typescript-deno-lint/types";
+import { relative } from "@std/path";
 
 import {
   isHtmlTemplate,
@@ -21,7 +24,13 @@ import {
   walkElements,
 } from "#helpers";
 import type { ParsedElement } from "#helpers";
-import { currentFileFacts, fileKey, scanFacts } from "#scan-index";
+import { registrationIndex, runtimeImportIndex } from "#scanner";
+
+/** A file path relative to the working directory, for a readable hint. */
+function shortPath(file: string): string {
+  const short = relative(Deno.cwd(), file).replaceAll("\\", "/");
+  return short === "" || short.startsWith("..") ? file : short;
+}
 
 /** Whether a tag names a custom element rather than a built-in one. */
 function isCustomElement(tagName: string): boolean {
@@ -41,17 +50,15 @@ function startTagSpan(
  */
 export const requireDirectRegistrationImport: Deno.lint.Rule = {
   create(ctx) {
-    const facts = scanFacts();
-    if (facts === null) {
+    const services = tryGetTypeServices(ctx);
+    if (services === null) {
       return {};
     }
-    const key = fileKey(facts.root, ctx.filename);
-    const fileFacts = currentFileFacts(ctx.filename, ctx.sourceCode.text);
-    if (fileFacts === null) {
-      return {};
-    }
-    const imported = new Set(fileFacts.imports);
-    const registrations = facts.cache.registrations;
+    // Every path here comes out of the same program, so they compare directly;
+    // only the hint is shortened, for a message worth reading.
+    const self = services.sourceFile.fileName;
+    const imported = runtimeImportIndex(services);
+    const registrations = registrationIndex(services);
 
     return {
       TaggedTemplateExpression(node) {
@@ -59,11 +66,11 @@ export const requireDirectRegistrationImport: Deno.lint.Rule = {
         const source = templateSource(node);
         walkElements(parseTemplate(source.text), (element) => {
           const tag = element.tagName;
-          const module = registrations[tag];
+          const module = registrations.get(tag);
           if (
             !isCustomElement(tag) ||
             module === undefined ||
-            module === key ||
+            module === self ||
             imported.has(module)
           ) {
             return;
@@ -74,7 +81,7 @@ export const requireDirectRegistrationImport: Deno.lint.Rule = {
             range: source.toSourceRange(span.startOffset, span.endOffset),
             message:
               `\`<${tag}>\` is used without importing the module that registers it.`,
-            hint: `Import \`${module}\` in this file.`,
+            hint: `Import \`${shortPath(module)}\` in this file.`,
           });
         });
       },

@@ -4,7 +4,7 @@
  * @module
  */
 
-import "#build";
+import "@cunarist/typescript-deno-lint/types";
 
 import { noDomQuery } from "./no-dom-query.ts";
 import { noQueryDecorators } from "./no-query-decorators.ts";

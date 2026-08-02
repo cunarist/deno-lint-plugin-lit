@@ -1,11 +1,13 @@
 /** Shared test harness for rule tests. */
 
+import { createDenoProgram } from "@cunarist/typescript-deno-lint/program";
+import {
+  clearTestProgram,
+  useTestProgram,
+} from "@cunarist/typescript-deno-lint/testing";
 import { assertEquals } from "@std/assert";
-import { join } from "@std/path";
+import { join, resolve } from "@std/path";
 import ts from "typescript";
-
-import { hashText, type ScanCache, setScanFacts } from "#scan-index";
-import { collectLitFacts, createDenoProgram } from "#scanner";
 
 export interface Case {
   /** Source snippet to lint. */
@@ -16,8 +18,9 @@ export interface Case {
   readonly reported?: readonly string[];
 }
 
-// Most snippets omit imports. These imports are appended to a checker-only copy,
-// so Lit symbols resolve without changing any original source offsets.
+// Most snippets omit imports. These are appended to the copy the checker sees,
+// so Lit symbols resolve without moving any of the snippet's own offsets — the
+// rules report ranges into the snippet, and a prefix would shift every one.
 const LIT_IMPORTS =
   `import { ReactiveElement } from "@lit/reactive-element";\n` +
   `import { LitElement } from "lit";\n` +
@@ -25,7 +28,7 @@ const LIT_IMPORTS =
   `import { html, svg, css } from "lit";\n`;
 
 // The same options `createDenoProgram` builds under, so the sync per-snippet
-// program checks types the way the scanner does.
+// program checks types the way a real lint run does.
 const OPTIONS: ts.CompilerOptions = {
   moduleResolution: ts.ModuleResolutionKind.Bundler,
   module: ts.ModuleKind.ESNext,
@@ -47,15 +50,15 @@ interface ResolverProgram {
   ): ts.ResolvedModuleWithFailedLookupLocations | undefined;
 }
 
-/** The warm detection state built once, over a program that resolves Lit. */
+/** The warm state built once, over a program that resolves Lit for real. */
 interface Warm {
-  /** The probe file's canonical name, as the program keys it. */
-  readonly probeFile: string;
-  /** Each `<referrer>\0<specifier>` to the file it resolves to. */
+  /** Each specifier the probe imports, to the file it resolves to. */
+  readonly probeEdges: ReadonlyMap<string, string>;
+  /** Each `<referrer>\0<specifier>` to its target, for every other file. */
   readonly edges: ReadonlyMap<string, string>;
   /** Every resolved source file except the probe, reused across snippets. */
   readonly sources: ReadonlyMap<string, ts.SourceFile>;
-  /** A reusable host whose only per-call change is the probe source. */
+  /** A reusable host whose only per-call change is the snippet source. */
   readonly baseHost: ts.CompilerHost;
 }
 
@@ -90,8 +93,18 @@ async function warmUp(): Promise<Warm> {
       }
       collectEdges(source, resolver, edges);
     }
+    // The snippet stands where the probe stood, under whatever name the test
+    // lints it as, so the probe's own resolutions are re-keyed by specifier
+    // alone and reapplied to it.
+    const probeEdges = new Map<string, string>();
+    for (const [key, target] of edges) {
+      const [referrer, specifier] = key.split("\0");
+      if (referrer === probeFile && specifier !== undefined) {
+        probeEdges.set(specifier, target);
+      }
+    }
     return {
-      probeFile,
+      probeEdges,
       edges,
       sources,
       baseHost: ts.createCompilerHost(OPTIONS, true),
@@ -125,6 +138,11 @@ function collectEdges(
   visit(source);
 }
 
+/** Rewrites platform separators as forward slashes. */
+function normalize(path: string): string {
+  return path.replaceAll("\\", "/");
+}
+
 /** The TypeScript extension a resolved file ends with. */
 function extensionOf(file: string): ts.Extension {
   if (file.endsWith(".d.ts")) return ts.Extension.Dts;
@@ -137,13 +155,21 @@ const warm = await warmUp();
 let oldProgram: ts.Program | undefined;
 
 /**
- * The checker-derived Lit facts for a snippet, at its original source offsets.
+ * A program in which the snippet resolves Lit, under the name it is linted as.
+ *
+ * The rules read this through `useTestProgram`, which is what makes a snippet
+ * with no imports type-checkable at all: nothing the plugin builds at load
+ * contains it, so without an installed program every type-aware rule would go
+ * silent and every test would pass vacuously.
  */
-function detectLitFacts(
-  code: string,
-): ReturnType<typeof collectLitFacts> {
-  const probeSource = ts.createSourceFile(
-    warm.probeFile,
+function programForSnippet(code: string, filename: string): ts.Program {
+  // TypeScript resolves a root name against the current directory before it
+  // asks the host for it, so the snippet is registered under that absolute path.
+  // `Program.getSourceFile` resolves the same way, which is how the rules find
+  // it again from the relative name they are linting under.
+  const path = normalize(resolve(filename));
+  const snippetFile = ts.createSourceFile(
+    path,
     `${code}\n${LIT_IMPORTS}`,
     ts.ScriptTarget.ESNext,
     true,
@@ -156,7 +182,7 @@ function detectLitFacts(
       onError,
       shouldCreate,
     ) => {
-      if (fileName === warm.probeFile) return probeSource;
+      if (normalize(fileName) === path) return snippetFile;
       return warm.sources.get(fileName) ??
         warm.baseHost.getSourceFile(
           fileName,
@@ -167,7 +193,9 @@ function detectLitFacts(
     },
     resolveModuleNameLiterals: (literals, containingFile) =>
       literals.map((literal) => {
-        const target = warm.edges.get(`${containingFile}\0${literal.text}`);
+        const target = normalize(containingFile) === path
+          ? warm.probeEdges.get(literal.text)
+          : warm.edges.get(`${containingFile}\0${literal.text}`);
         if (target === undefined) return { resolvedModule: undefined };
         return {
           resolvedModule: {
@@ -177,13 +205,9 @@ function detectLitFacts(
         };
       }),
   };
-  const program = ts.createProgram([warm.probeFile], OPTIONS, host, oldProgram);
+  const program = ts.createProgram([path], OPTIONS, host, oldProgram);
   oldProgram = program;
-  const checker = program.getTypeChecker();
-  const source = program.getSourceFile(warm.probeFile);
-  return source === undefined
-    ? { components: [], templates: [] }
-    : collectLitFacts(source, checker);
+  return program;
 }
 
 /** Run a plugin over a snippet and return its diagnostics. */
@@ -192,23 +216,11 @@ export function lint(
   code: string,
   filename = "component.ts",
 ): Deno.lint.Diagnostic[] {
-  const lit = detectLitFacts(code);
-  const cache: ScanCache = {
-    registrations: {},
-    files: {
-      [filename]: {
-        hash: hashText(code),
-        components: lit.components,
-        templates: lit.templates,
-        imports: [],
-      },
-    },
-  };
-  setScanFacts({ root: Deno.cwd(), cache });
+  useTestProgram(programForSnippet(code, filename));
   try {
     return Deno.lint.runPlugin(plugin, filename, code);
   } finally {
-    setScanFacts(null);
+    clearTestProgram();
   }
 }
 

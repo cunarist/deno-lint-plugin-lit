@@ -36,7 +36,7 @@ per memory file.
 - `deno fmt`, `deno check`, and `deno lint` must all pass on this package
   itself.
 - Every rule has tests. Use `Deno.lint.runPlugin`, which is only available under
-  `deno test`. Run them as `deno test -A` — see "Scanner".
+  `deno test`. Run them as `deno test -A` — see "Type information".
 - Annotate the plugin as `Deno.lint.Plugin` — visitor callback params infer from
   it, and JSR's slow-types check needs the explicit public type.
 - `license` must be set in `deno.json` (or a LICENSE file present) or
@@ -49,8 +49,8 @@ per memory file.
 
 ### Packaging: five plugins
 
-The scanner is an internal implementation detail, not a public export. The five
-subpaths are all lint plugins.
+Type-aware detection is an internal implementation detail, not a public export.
+The five subpaths are all lint plugins.
 
 Deno's plugin API is `{ name, rules }` — **no tags, no presets, and no per-rule
 options** (`RuleContext` has no `options`). Verified: `deno.json`
@@ -103,44 +103,41 @@ rules individually alongside its `*Rules` record, so composing a custom
 if `.` were also a plugin, a user loading both `.` and `./core` would get every
 diagnostic twice.
 
-### Scanner
+### Type information
 
-Cross-file and type facts are built once at plugin load, because a lint rule is
-synchronous and cannot build a TypeScript program. Four aliases, layered:
+A lint rule is synchronous and cannot build a TypeScript program, so the program
+is built once at plugin load. That whole mechanism lives in
+`@cunarist/typescript-deno-lint`; this package only asks it questions. Each
+plugin barrel carries `import "@cunarist/typescript-deno-lint/types"` for its
+side effect, which is what triggers the build.
 
-- `#build` — top-level await at plugin load, imported for its side effect by
-  each plugin barrel. Builds the program and hands the facts to `#scan-index`.
-  Reaches `#scanner` through a dynamic import.
-- `#scanner` — `createDenoProgram` (a `@deno/loader` host: import maps,
-  workspaces, `npm:`/`jsr:`/`https:`, no `node_modules` needed) plus the
-  checker-based fact builders.
-- `#scan-index` — the store: `ScanCache`, `setScanFacts`, `scanFacts`,
-  `fileKey`, `hashText`. Lowest layer, no TypeScript import.
-- `#helpers` — reads the facts; accurate-or-silent.
+Two layers here:
 
-**The facts live in a module variable, never on disk.** Verified: `deno lint`
-runs every rule in the isolate that loaded the plugin, so one TLA build reaches
-all of them even though files are processed in parallel. A lint run must not
-write into the project it is linting — an earlier disk cache
-(`.lit-scan-cache.json`) did, and is gone.
+- `#scanner` — takes a checker and answers about TypeScript nodes:
+  `isLitComponent`, `litTemplateKind`, `collectRegistrations`,
+  `runtimeImportedFiles`, and the two memoized whole-program indexes.
+- `#helpers` — hands a rule's own lint nodes over, through
+  `tryGetTypeServices(ctx).getTSNode(node)`. Accurate-or-silent: no type
+  information means `false`, never a guess.
 
-Facts are keyed by **source offset**, so any edit above them shifts every
-offset; each file's facts carry a content hash to detect that. On a mismatch the
-facts for that one file are **rebuilt** — the loader, host, and program stay
-alive, and `rebuild(path, text)` swaps that file's `SourceFile` and passes the
-previous program as `oldProgram`. Every unchanged file is handed back as the
-identical object, so only the edited file is parsed: ~250ms to build, ~3ms to
-rebuild. Rules read through `currentFileFacts` in `#scan-index`, which memoizes
-a rebuild per file and hash so it happens once, not once per rule. Never call
-`buildCache` on a rebuild — it walks the whole project with a cold checker,
-which is the cost the rebuild exists to avoid. Restart Deno Server still picks
-up other files' changes. Rejected alternatives and the reasoning are in
-`.agents/memory/scanner-architecture.md` — read it before changing any of this.
+**Ask the checker per node; do not precompute.** An earlier design walked every
+file at load and stored the answers keyed by source offset, with a content hash
+per file to detect edits and a rebuild on mismatch. All of that is gone —
+`getTSNode` reaches the declaration directly, so there is nothing to key and
+nothing to invalidate.
 
-Tests run `deno test -A`. They import the public barrels, so the real scanner
-build runs in each test isolate before the harness injects snippet-specific
-facts through `setScanFacts`. `-A` is required because both paths read the
-module graph.
+The two exceptions are in `scanner/project-index.ts`, and they are exceptions
+because **no single file can answer them**: which module registers a given tag
+needs every file in the program, and the runtime-import closure follows `mod.ts`
+re-exports across files. Both are memoized — registrations per `ts.Program`,
+imports per `ts.SourceFile` — so a rebuilt program or a reparsed file recomputes
+rather than answering from the previous one. Adding a third memoized index is
+almost always the wrong move; check first whether the checker answers it from
+the node in hand.
+
+Tests run `deno test -A`; `-A` is required because building a program reads the
+module graph. `tests/harness.ts` builds a program per snippet and installs it
+with `useTestProgram` — see "Testing" below.
 
 ### Per-rule docs
 
@@ -202,16 +199,15 @@ Checked empirically against Deno 2.9.3 — do not re-litigate:
   accept a `super.x()` call nested inside `if`/`try`.
 - The **lint AST has no cross-file resolution**. A rule that needs the
   superclass chain or a registration site cannot get it from `Program.body`
-  alone. That is what the scanner exists for — see "Scanner" below; a rule must
-  not re-add a same-module heuristic to work around it.
-- **`isLitComponent(node, ctx)` reads scanner facts, never the AST.** It looks
-  the class name's source offset up in the facts for `ctx.filename`, rebuilding
-  them first when the file has changed, and returns `false` when there are none
-  — accurate or silent, never a guess. The old four-signal AST heuristic
-  (`extends LitElement` / `@customElement` / `render()` returning `html` /
-  `static styles` from `css`) is deleted; do not reintroduce it.
-  `no-manual-update` is gated on it too, even though `this.requestUpdate()`
-  alone implies a `ReactiveElement`.
+  alone. That is what the checker exists for — see "Type information" above; a
+  rule must not re-add a same-module heuristic to work around it.
+- **`isLitComponent(node, ctx)` asks the checker, never the AST.** It maps the
+  lint node to its TypeScript declaration and walks the heritage chain, and
+  returns `false` when there is no type information — accurate or silent, never
+  a guess. The old four-signal AST heuristic (`extends LitElement` /
+  `@customElement` / `render()` returning `html` / `static styles` from `css`)
+  is deleted; do not reintroduce it. `no-manual-update` is gated on it too, even
+  though `this.requestUpdate()` alone implies a `ReactiveElement`.
 - **Import-map aliases are fine for shipping, but break path-loading.** Internal
   imports use `#helpers` (mapped in `deno.json`). `deno publish` rewrites
   specifiers to fully-qualified ones at publish time, so consumers installing
@@ -271,6 +267,25 @@ whose markup is unbalanced across several tags gets re-indented as though the
 stray closing tag were a child, which reads as a different bug than the one
 being shown. Keep doc snippets to a single tag or balanced one-liners — those
 survive untouched.
+
+### Testing
+
+`tests/harness.ts` builds a TypeScript program per snippet and installs it with
+`useTestProgram`, because a snippet belongs to no project and nothing built at
+plugin load contains it. **Without an installed program every type-aware rule
+goes silent and every `assertValid` passes for the wrong reason** — which is
+exactly what happened mid-migration, and is why `assertInvalid` cases matter
+more than they look.
+
+The imports a snippet omits are **appended**, never prefixed: rules report
+ranges into the snippet, and a prefix would shift every one. The snippet is
+registered under `resolve(filename)`, since TypeScript resolves a root name
+against the working directory before asking the host for it.
+
+`tests/scanner_fixture/` is a real project with its own `deno.json`, excluded
+from this one, used by the tests that need more than one file. Its `bad.ts` and
+`good.ts` import Lit for real, because `require-direct-registration-import` runs
+`isHtmlTemplate` and a locally defined `html` is correctly not Lit's.
 
 ### Integration testing
 

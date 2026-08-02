@@ -21,7 +21,8 @@ Verified on Deno 2.9.3, 2026-07-26.
   [[scanner-architecture]].
 - **`Deno.readTextFileSync` works** inside a rule under real `deno lint`.
 - **Top-level `await` in a plugin module is awaited** before rules run — so a
-  plugin can do async setup (e.g. build a program) at load. Basis of `#build`.
+  plugin can do async setup (e.g. build a program) at load. Basis of the program
+  build in `@cunarist/typescript-deno-lint`.
 - **`new Worker` + `Atomics.wait` (main-thread) work** under real `deno lint`
   (Deno allows main-thread `Atomics.wait`, unlike browsers). But blocking
   freezes the whole lint thread, so we don't use it. See

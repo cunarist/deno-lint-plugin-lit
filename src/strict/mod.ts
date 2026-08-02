@@ -4,7 +4,7 @@
  * @module
  */
 
-import "#build";
+import "@cunarist/typescript-deno-lint/types";
 
 import { directiveAllowlist } from "./directive-allowlist.ts";
 import { noBooleanPropertyDefaultTrue } from "./no-boolean-property-default-true.ts";

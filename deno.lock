@@ -2,12 +2,14 @@
   "version": "5",
   "specifiers": {
     "jsr:@cunarist/deno-import-check@0.7.0": "0.7.0",
+    "jsr:@cunarist/typescript-deno-lint@~0.1.2": "0.1.2",
     "jsr:@deno/loader@0.5": "0.5.0",
-    "jsr:@deno/loader@0.5.0": "0.5.0",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/fs@1": "1.0.24",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/json@^1.0.2": "1.1.0",
+    "jsr:@std/jsonc@1": "1.0.2",
     "jsr:@std/path@1": "1.1.6",
     "jsr:@std/path@^1.1.5": "1.1.6",
     "npm:@lit/reactive-element@2": "2.1.2",
@@ -18,6 +20,16 @@
   "jsr": {
     "@cunarist/deno-import-check@0.7.0": {
       "integrity": "7dc13eddd4c1af6cdb130f5719b815d507abde8b7dc64b77e760120432cf568b"
+    },
+    "@cunarist/typescript-deno-lint@0.1.2": {
+      "integrity": "c2478c04be4b4f9fea70b3eff598670b3ec09d62824aa8c198a77bbd95cc35ea",
+      "dependencies": [
+        "jsr:@deno/loader",
+        "jsr:@std/fs",
+        "jsr:@std/jsonc",
+        "jsr:@std/path@1",
+        "npm:typescript"
+      ]
     },
     "@deno/loader@0.5.0": {
       "integrity": "a6d94408de5e6bacac404f8f6963c8b8cc278cfd1a878aa2f06b34a083d6bfee"
@@ -37,6 +49,15 @@
     },
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/json@1.1.0": {
+      "integrity": "93330d3ed4054d6b1ffe54b075432c80a5f671be77277b978931e018014cb1cc"
+    },
+    "@std/jsonc@1.0.2": {
+      "integrity": "909605dae3af22bd75b1cbda8d64a32cf1fd2cf6efa3f9e224aba6d22c0f44c7",
+      "dependencies": [
+        "jsr:@std/json"
+      ]
     },
     "@std/path@1.1.6": {
       "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
@@ -103,9 +124,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deno/loader@0.5",
+      "jsr:@cunarist/typescript-deno-lint@~0.1.2",
       "jsr:@std/assert@1",
-      "jsr:@std/fs@1",
       "jsr:@std/path@1",
       "npm:parse5@^8.0.1",
       "npm:typescript@^5.7.0"

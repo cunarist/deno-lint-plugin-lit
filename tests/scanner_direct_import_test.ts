@@ -1,76 +1,103 @@
+import { createDenoProgram } from "@cunarist/typescript-deno-lint/program";
 import { assertEquals } from "@std/assert";
-import { dirname, fromFileUrl, join } from "@std/path";
+import { dirname, fromFileUrl, join, relative } from "@std/path";
+import type ts from "typescript";
 
-import { buildCache, createDenoProgram } from "#scanner";
+import { collectRegistrations, runtimeImportedFiles } from "#scanner";
 
 const fixture = (name: string): string =>
   fromFileUrl(new URL(`./scanner_fixture/${name}`, import.meta.url))
     .replaceAll("\\", "/");
 
 const config = fixture("deno.json");
-const root = dirname(config);
+const root = dirname(config).replaceAll("\\", "/");
 
-Deno.test("scanner facts: records direct runtime imports", async () => {
-  const bad = fixture("bad.ts");
-  const good = fixture("good.ts");
-  const { program } = await createDenoProgram([bad, good], config);
-  const cache = buildCache(program, [bad, good], root);
-  assertEquals(cache.files["bad.ts"]?.imports, ["element-a.ts"]);
-  assertEquals(cache.files["good.ts"]?.imports, [
-    "element-a.ts",
-    "element-b.ts",
-  ]);
+/** A fixture path relative to the fixture root, for a readable assertion. */
+function toRoot(file: string): string {
+  return relative(root, file).replaceAll("\\", "/");
+}
+
+/**
+ * The fixture files a source runs, relative to the fixture root.
+ *
+ * `bad.ts` and `good.ts` import Lit itself, for the real `html` tag the rule
+ * needs; the package is a genuine runtime import but says nothing about which
+ * fixture module registers what, so only the fixture's own files are asserted.
+ */
+async function importsOf(name: string): Promise<string[]> {
+  const file = fixture(name);
+  const { program } = await createDenoProgram([file], config);
+  const source = program.getSourceFile(file);
+  if (source === undefined) {
+    return [];
+  }
+  return [...runtimeImportedFiles(source, program.getTypeChecker())]
+    .filter((imported) => imported.startsWith(`${root}/`))
+    .map(toRoot);
+}
+
+/** Every tag the program registers, mapped to a fixture-relative path. */
+function registrationsIn(program: ts.Program): Record<string, string> {
+  const found: Record<string, string> = {};
+  for (
+    const [tag, file] of collectRegistrations(program, program.getTypeChecker())
+  ) {
+    found[tag] = toRoot(file);
+  }
+  return found;
+}
+
+Deno.test("scanner: records direct runtime imports", async () => {
+  assertEquals(await importsOf("bad.ts"), ["element-a.ts"]);
+  assertEquals(await importsOf("good.ts"), ["element-a.ts", "element-b.ts"]);
 });
 
-Deno.test("scanner facts: follows an imported `mod.ts` within its folder", async () => {
-  const source = fixture("uses-mod.ts");
-  const { program } = await createDenoProgram([source], config);
-  const cache = buildCache(program, [source], root);
-  assertEquals(cache.files["uses-mod.ts"]?.imports, [
+Deno.test("scanner: follows an imported `mod.ts` within its folder", async () => {
+  assertEquals(await importsOf("uses-mod.ts"), [
     "widgets/mod.ts",
     "widgets/nested/mod.ts",
     "widgets/element-e.ts",
     "widgets/nested/element-f.ts",
   ]);
-  assertEquals(cache.registrations["cl-e"], "widgets/element-e.ts");
-  assertEquals(cache.registrations["cl-f"], "widgets/nested/element-f.ts");
+  const { program } = await createDenoProgram([fixture("uses-mod.ts")], config);
+  const registrations = registrationsIn(program);
+  assertEquals(registrations["cl-e"], "widgets/element-e.ts");
+  assertEquals(registrations["cl-f"], "widgets/nested/element-f.ts");
   // `#outside` sits outside the folder `widgets/mod.ts` stands for, and
   // `./element-g.ts` is re-exported type-only, so neither is reached.
-  assertEquals(cache.registrations["cl-a"], "element-a.ts");
-  assertEquals(cache.registrations["cl-g"], "widgets/element-g.ts");
+  assertEquals(registrations["cl-a"], "element-a.ts");
+  assertEquals(registrations["cl-g"], "widgets/element-g.ts");
 });
 
-Deno.test("scanner facts: does not follow a barrel that is not `mod.ts`", async () => {
-  const source = fixture("indirect.ts");
-  const { program } = await createDenoProgram([source], config);
-  const cache = buildCache(program, [source], root);
-  assertEquals(cache.files["indirect.ts"]?.imports, ["register-elements.ts"]);
-  assertEquals(cache.registrations["cl-b"], "element-b.ts");
+Deno.test("scanner: does not follow a barrel that is not `mod.ts`", async () => {
+  assertEquals(await importsOf("indirect.ts"), ["register-elements.ts"]);
+  const { program } = await createDenoProgram([fixture("indirect.ts")], config);
+  assertEquals(registrationsIn(program)["cl-b"], "element-b.ts");
 });
 
-Deno.test("scanner facts: excludes type-only imports", async () => {
-  const element = fixture("element-d.ts");
-  const source = fixture("type-only.ts");
-  const { program } = await createDenoProgram([element, source], config);
-  const cache = buildCache(program, [element, source], root);
-  assertEquals(cache.files["type-only.ts"]?.imports, []);
-  assertEquals(cache.registrations["cl-d"], "element-d.ts");
+Deno.test("scanner: excludes type-only imports", async () => {
+  assertEquals(await importsOf("type-only.ts"), []);
+  const { program } = await createDenoProgram(
+    [fixture("element-d.ts"), fixture("type-only.ts")],
+    config,
+  );
+  assertEquals(registrationsIn(program)["cl-d"], "element-d.ts");
 });
 
-Deno.test("scanner facts: records define registrations", async () => {
-  const element = fixture("element-c.ts");
-  const source = fixture("uses-c.ts");
-  const { program } = await createDenoProgram([element, source], config);
-  const cache = buildCache(program, [element, source], root);
-  assertEquals(cache.registrations["cl-c"], "element-c.ts");
+Deno.test("scanner: records define registrations", async () => {
+  const { program } = await createDenoProgram(
+    [fixture("element-c.ts"), fixture("uses-c.ts")],
+    config,
+  );
+  assertEquals(registrationsIn(program)["cl-c"], "element-c.ts");
 });
 
-Deno.test("scanner facts: ignores shadowed registration names", async () => {
-  const root = await Deno.makeTempDir();
+Deno.test("scanner: ignores shadowed registration names", async () => {
+  const temporary = await Deno.makeTempDir();
   try {
-    const config = join(root, "deno.json");
-    const source = join(root, "shadowed.ts");
-    await Deno.writeTextFile(config, `{ "imports": {} }`);
+    const localConfig = join(temporary, "deno.json");
+    const source = join(temporary, "shadowed.ts");
+    await Deno.writeTextFile(localConfig, `{ "imports": {} }`);
     await Deno.writeTextFile(
       source,
       `export {};
@@ -89,10 +116,12 @@ interface HTMLElementTagNameMap {
 }
 `,
     );
-    const { program } = await createDenoProgram([source], config);
-    const cache = buildCache(program, [source], root);
-    assertEquals(cache.registrations, {});
+    const { program } = await createDenoProgram([source], localConfig);
+    assertEquals(
+      [...collectRegistrations(program, program.getTypeChecker())],
+      [],
+    );
   } finally {
-    await Deno.remove(root, { recursive: true });
+    await Deno.remove(temporary, { recursive: true });
   }
 });

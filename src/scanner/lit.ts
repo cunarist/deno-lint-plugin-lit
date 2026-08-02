@@ -1,6 +1,7 @@
 import ts from "typescript";
 
-import type { LitTemplateKind } from "#scan-index";
+/** A tagged-template kind provided by Lit. */
+export type LitTemplateKind = "html" | "svg" | "css";
 
 /**
  * Type-aware Lit detection, over a program the analyzer resolved.
